@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBuddy AI — Symptom Checker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy:     #0b1d3a;
+      --navy-mid: #132848;
+      --navy-light: #1e3a5f;
+      --emerald:  #00c896;
+      --emerald-dim: #00a37a;
+      --cream:    #f4f7f2;
+      --white:    #ffffff;
+      --muted:    #8fa3b1;
+      --danger:   #ff6b6b;
+      --glass:    rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.12);
+      --shadow:   0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: var(--navy);
+      background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(0,200,150,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(30,58,95,0.6) 0%, transparent 60%);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem 2.5rem;
+      border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11,29,58,0.85);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--emerald);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      animation: pulse-glow 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,200,150,0.4); }
+      50%       { box-shadow: 0 0 0 10px rgba(0,200,150,0); }
+    }
+
+    .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      letter-spacing: -0.01em;
+      color: var(--white);
+    }
+
+    .logo-text span { color: var(--emerald); }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-left: 1.5rem;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--emerald); }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 5rem 1.5rem 3rem;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(0,200,150,0.12);
+      border: 1px solid rgba(0,200,150,0.3);
+      color: var(--emerald);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      line-height: 1.15;
+      max-width: 720px;
+      margin: 0 auto 1.2rem;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--emerald);
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Main card ── */
+    .card-wrap {
+      max-width: 720px;
+      margin: 0 auto 4rem;
+      padding: 0 1.5rem;
+      animation: fadeUp 0.9s ease both;
+    }
+
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .card-sub {
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ── Symptom rows ── */
+    #symptom-container { display: flex; flex-direction: column; gap: 1rem; }
+
+    .symptom-row {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1.2rem 1.5rem;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+
+    .symptom-row:hover { border-color: rgba(0,200,150,0.4); }
+
+    .row-top {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .row-num {
+      width: 26px;
+      height: 26px;
+      background: var(--emerald);
+      color: var(--navy);
+      border-radius: 50%;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .symptom-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .symptom-input::placeholder { color: var(--muted); font-weight: 400; }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.25rem;
+      border-radius: 50%;
+      transition: color 0.2s, background 0.2s;
+      line-height: 1;
+    }
+    .remove-btn:hover { color: var(--danger); background: rgba(255,107,107,0.1); }
+
+    /* Severity slider */
+    .sev-wrap { display: flex; align-items: center; gap: 0.75rem; }
+
+    .sev-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+      min-width: 65px;
+    }
+
+    .sev-val {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--emerald);
+      min-width: 14px;
+    }
+
+    input[type=range] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      background: var(--glass-border);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--emerald);
+      cursor: pointer;
+      box-shadow: 0 0 0 3px rgba(0,200,150,0.2);
+    }
+
+    .sev-dots {
+      display: flex;
+      gap: 3px;
+    }
+
+    .sev-dots span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--glass-border);
+      transition: background 0.2s;
+    }
+
+    /* ── Buttons ── */
+    .btn-add {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      border: 1px dashed rgba(0,200,150,0.4);
+      color: var(--emerald);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      justify-content: center;
+      margin-top: 0.5rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn-add:hover {
+      background: rgba(0,200,150,0.07);
+      border-color: var(--emerald);
+    }
+
+    .btn-submit {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      background: var(--emerald);
+      color: var(--navy);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 1rem;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-submit:hover { background: var(--emerald-dim); }
+    .btn-submit:active { transform: scale(0.98); }
+
+    .btn-submit svg { transition: transform 0.3s; }
+    .btn-submit:hover svg { transform: translateX(3px); }
+
+    /* ── Disclaimer ── */
+    .disclaimer {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      background: rgba(255,107,107,0.07);
+      border: 1px solid rgba(255,107,107,0.2);
+      border-radius: 10px;
+      padding: 0.9rem 1.1rem;
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: #ffb3b3;
+      line-height: 1.5;
+    }
+
+    /* ── Autocomplete dropdown ── */
+    .ac-wrap { position: relative; flex: 1; }
+    .ac-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: -0.5rem;
+      right: -0.5rem;
+      background: var(--navy-mid);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      z-index: 200;
+      overflow: hidden;
+      max-height: 200px;
+      overflow-y: auto;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+
+    .ac-item {
+      padding: 0.65rem 1rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      color: var(--white);
+      border-bottom: 1px solid var(--glass-border);
+      transition: background 0.15s;
+    }
+
+    .ac-item:last-child { border-bottom: none; }
+    .ac-item:hover, .ac-item.active { background: rgba(0,200,150,0.12); color: var(--emerald); }
+
+    /* ── Chatbot ── */
+    .chat-fab {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 56px;
+      height: 56px;
+      background: var(--emerald);
+      color: var(--navy);
+      border: none;
+      border-radius: 50%;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 8px 28px rgba(0,200,150,0.4);
+      z-index: 300;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chat-fab:hover {
+      transform: scale(1.08);
+      box-shadow: 0 12px 36px rgba(0,200,150,0.5);
+    }
+
+    .chat-panel {
+      position: fixed;
+      bottom: 6rem;
+      right: 2rem;
+      width: 360px;
+      max-height: 520px;
+      background: var(--navy-mid);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      z-index: 299;
+      transform: translateY(20px) scale(0.95);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .chat-panel.open {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--glass-border);
+      background: rgba(0,200,150,0.08);
+    }
+
+    .chat-header-info { display: flex; align-items: center; gap: 0.6rem; }
+    .chat-avatar { font-size: 1.3rem; }
+    .chat-title { font-size: 0.9rem; font-weight: 600; }
+    .chat-online { font-size: 0.72rem; color: var(--emerald); }
+
+    .chat-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+    .chat-close:hover { color: var(--white); }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 2px; }
+
+    .msg {
+      max-width: 85%;
+      padding: 0.7rem 0.9rem;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      line-height: 1.55;
+      animation: msgIn 0.25s ease;
+    }
+
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg.user {
+      background: var(--emerald);
+      color: var(--navy);
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+      font-weight: 500;
+    }
+
+    .msg.bot {
+      background: rgba(255,255,255,0.07);
+      color: var(--white);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg.typing span {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: var(--muted);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+      margin: 0 1px;
+    }
+    .msg.typing span:nth-child(2) { animation-delay: 0.15s; }
+    .msg.typing span:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40%           { transform: translateY(-6px); }
+    }
+
+    .chat-footer {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.9rem;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .chat-input-field {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--glass-border);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      padding: 0.65rem 1rem;
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input-field:focus { border-color: var(--emerald); }
+    .chat-input-field::placeholder { color: var(--muted); }
+
+    .chat-send {
+      background: var(--emerald);
+      color: var(--navy);
+      border: none;
+      border-radius: 10px;
+      width: 40px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .chat-send:hover { background: var(--emerald-dim); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      header { padding: 1rem 1.25rem; }
+      .card  { padding: 1.5rem; }
+      .chat-panel { width: calc(100vw - 2rem); right: 1rem; bottom: 5.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🩺</div>
+    <span class="logo-text">Medi<span>Buddy</span> AI</span>
+  </div>
+  <nav>
+    <a href="/">Home</a>
+    <a href="#about">About</a>
+  </nav>
+</header>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div class="hero-badge">
+    <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
+    AI-Powered Diagnosis
+  </div>
+  <h1>Understand your symptoms<br>with <em>intelligent</em> care</h1>
+  <p>Enter your symptoms below and get instant illness predictions with suggested remedies — powered by real medical data.</p>
+</div>
+
+<!-- ── Main form ── -->
+<div class="card-wrap">
+  <div class="card">
+    <div class="card-title">Symptom Checker</div>
+    <div class="card-sub">Add one or more symptoms and rate their severity</div>
+
+    <form method="POST" action="/result" id="symptom-form">
+      <div id="symptom-container"></div>
+
+      <button type="button" class="btn-add" onclick="addSymptomRow()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Add another symptom
+      </button>
+
+      <button type="submit" class="btn-submit">
+        Analyse Symptoms
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3 9h12M10 4l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </form>
+
+    <div class="disclaimer">
+      <span>⚠️</span>
+      <span>This tool is for informational purposes only and does not replace professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Footer ── -->
+<footer id="about">
+  <p>MediBuddy AI &nbsp;·&nbsp; Built with Python, Flask &amp; Claude AI &nbsp;·&nbsp; Dataset: 378 diseases × 377 symptoms</p>
+</footer>
+
+<!-- ── Chatbot FAB ── -->
+<button class="chat-fab" onclick="toggleChat()" title="Open MediBuddy chatbot">💬</button>
+
+<!-- ── Chatbot Panel ── -->
+<div class="chat-panel" id="chat-panel">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <span class="chat-avatar">🤖</span>
+      <div>
+        <div class="chat-title">MediBuddy Assistant</div>
+        <div class="chat-online">● Online</div>
+      </div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="msg bot">👋 Hi! I'm MediBuddy. Describe your symptoms and I'll help you understand what might be going on.</div>
+  </div>
+  <div class="chat-footer">
+    <input class="chat-input-field" id="chat-input" placeholder="Describe your symptoms…" onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="chat-send" onclick="sendChat()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M14 2L7 9M14 2L10 14l-3-5-5-3 12-4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- ── All symptom names from dataset for autocomplete ── -->
+<script>
+  const ALL_SYMPTOMS = {{ all_symptoms | tojson }};
+  let rowCount = 0;
+  let chatHistory = [];
+
+  // ── Symptom rows ──────────────────────────────────────────────────────────
+  function addSymptomRow(initial = false) {
+    rowCount++;
+    const container = document.getElementById("symptom-container");
+    const row = document.createElement("div");
+    row.className = "symptom-row";
+    row.id = `row-${rowCount}`;
+    row.innerHTML = `
+      <div class="row-top">
+        <div class="row-num">${rowCount}</div>
+        <div class="ac-wrap">
+          <input
+            class="symptom-input"
+            type="text"
+            name="symptoms"
+            placeholder="e.g. fever, cough, headache…"
+            autocomplete="off"
+            oninput="showAC(this, ${rowCount})"
+            onblur="hideAC(${rowCount})"
+            onkeydown="navAC(event, ${rowCount})"
+            ${initial ? 'required' : ''}
+          >
+          <div class="ac-dropdown" id="ac-${rowCount}" style="display:none"></div>
+        </div>
+        ${rowCount > 1 ? `<button type="button" class="remove-btn" onclick="removeRow(${rowCount})" title="Remove">✕</button>` : ''}
+      </div>
+      <div class="sev-wrap">
+        <span class="sev-label">Severity:</span>
+        <input type="range" name="severity" min="1" max="5" value="1"
+          oninput="updateSev(this, ${rowCount})">
+        <span class="sev-val" id="sv-${rowCount}">1</span>
+        <div class="sev-dots" id="dots-${rowCount}">
+          ${[1,2,3,4,5].map(i => `<span id="d-${rowCount}-${i}"></span>`).join('')}
+        </div>
+      </div>
+    `;
+    container.appendChild(row);
+    updateDots(1, rowCount);
+  }
+
+  function removeRow(id) {
+    document.getElementById(`row-${id}`)?.remove();
+    // Re-number
+    const rows = document.querySelectorAll('.symptom-row');
+    rows.forEach((r, i) => r.querySelector('.row-num').textContent = i + 1);
+  }
+
+  function updateSev(input, id) {
+    const v = input.value;
+    document.getElementById(`sv-${id}`).textContent = v;
+    updateDots(v, id);
+  }
+
+  function updateDots(v, id) {
+    const colors = ['#4ade80','#a3e635','#fbbf24','#f97316','#ef4444'];
+    for (let i = 1; i <= 5; i++) {
+      const d = document.getElementById(`d-${id}-${i}`);
+      if (d) d.style.background = i <= v ? colors[v - 1] : 'var(--glass-border)';
+    }
+  }
+
+  // ── Autocomplete ─────────────────────────────────────────────────────────
+  let acIndex = -1;
+
+  function showAC(input, id) {
+    const q = input.value.toLowerCase().trim();
+    const dd = document.getElementById(`ac-${id}`);
+    if (!q || q.length < 2) { dd.style.display = 'none'; return; }
+
+    const matches = ALL_SYMPTOMS.filter(s => s.includes(q)).slice(0, 8);
+    if (!matches.length) { dd.style.display = 'none'; return; }
+
+    dd.innerHTML = matches.map(m =>
+      `<div class="ac-item" onmousedown="pickAC('${m}', ${id})">${highlight(m, q)}</div>`
+    ).join('');
+    dd.style.display = 'block';
+    acIndex = -1;
+  }
+
+  function highlight(text, q) {
+    const i = text.indexOf(q);
+    if (i < 0) return text;
+    return text.slice(0,i) + `<strong style="color:var(--emerald)">${text.slice(i, i+q.length)}</strong>` + text.slice(i+q.length);
+  }
+
+  function pickAC(val, id) {
+    const row = document.getElementById(`row-${id}`);
+    row.querySelector('.symptom-input').value = val;
+    document.getElementById(`ac-${id}`).style.display = 'none';
+  }
+
+  function hideAC(id) {
+    setTimeout(() => {
+      const dd = document.getElementById(`ac-${id}`);
+      if (dd) dd.style.display = 'none';
+    }, 150);
+  }
+
+  function navAC(e, id) {
+    const dd = document.getElementById(`ac-${id}`);
+    const items = dd.querySelectorAll('.ac-item');
+    if (!items.length) return;
+    if (e.key === 'ArrowDown') { acIndex = Math.min(acIndex+1, items.length-1); }
+    else if (e.key === 'ArrowUp') { acIndex = Math.max(acIndex-1, 0); }
+    else if (e.key === 'Enter' && acIndex >= 0) {
+      e.preventDefault();
+      items[acIndex].dispatchEvent(new MouseEvent('mousedown'));
+      return;
+    } else return;
+    items.forEach((it, i) => it.classList.toggle('active', i === acIndex));
+  }
+
+  // ── Chatbot ───────────────────────────────────────────────────────────────
+  function toggleChat() {
+    document.getElementById('chat-panel').classList.toggle('open');
+  }
+
+  async function sendChat() {
+    const inp = document.getElementById('chat-input');
+    const msgs = document.getElementById('chat-messages');
+    const text = inp.value.trim();
+    if (!text) return;
+
+    // User bubble
+    msgs.innerHTML += `<div class="msg user">${escHtml(text)}</div>`;
+    inp.value = '';
+    msgs.scrollTop = msgs.scrollHeight;
+
+    // Typing indicator
+    const typing = document.createElement('div');
+    typing.className = 'msg bot typing';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    msgs.appendChild(typing);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    chatHistory.push({ role: 'user', content: text });
+
+    try {
+      const res = await fetch('/chatbot-response', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history: chatHistory })
+      });
+      const data = await res.json();
+      typing.remove();
+      const reply = data.reply || 'Sorry, I had trouble responding.';
+      msgs.innerHTML += `<div class="msg bot">${escHtml(reply)}</div>`;
+      chatHistory.push({ role: 'assistant', content: reply });
+    } catch {
+      typing.remove();
+      msgs.innerHTML += `<div class="msg bot">⚠️ Connection error. Please try again.</div>`;
+    }
+
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  addSymptomRow(true);
+</script>
+</body>
+</html>

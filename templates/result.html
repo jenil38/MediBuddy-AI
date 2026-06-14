@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnosis Result — MediBuddy AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy:      #0b1d3a;
+      --navy-mid:  #132848;
+      --emerald:   #00c896;
+      --cream:     #f4f7f2;
+      --white:     #ffffff;
+      --muted:     #8fa3b1;
+      --danger:    #ff6b6b;
+      --warning:   #fbbf24;
+      --glass:     rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: var(--navy);
+      background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(0,200,150,0.07) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 90%, rgba(30,58,95,0.5) 0%, transparent 60%);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--white);
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem 2.5rem;
+      border-bottom: 1px solid var(--glass-border);
+      background: rgba(11,29,58,0.85);
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      text-decoration: none;
+      color: var(--white);
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--emerald);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .logo em { font-style: normal; color: var(--emerald); }
+
+    .main { max-width: 780px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+    /* ── Page header ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .page-header-icon {
+      width: 52px;
+      height: 52px;
+      background: rgba(0,200,150,0.15);
+      border: 1px solid rgba(0,200,150,0.3);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .page-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+    }
+
+    .page-header p { color: var(--muted); font-size: 0.875rem; margin-top: 0.2rem; }
+
+    /* ── Symptom chips ── */
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .chip {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .chip-sev {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ── Diagnosis cards ── */
+    .diagnoses { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .diag-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      overflow: hidden;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    .diag-card:nth-child(2) { animation-delay: 0.08s; }
+    .diag-card:nth-child(3) { animation-delay: 0.16s; }
+    .diag-card:nth-child(4) { animation-delay: 0.24s; }
+    .diag-card:nth-child(5) { animation-delay: 0.32s; }
+
+    .diag-card.primary { border-color: rgba(0,200,150,0.35); }
+
+    .diag-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .diag-name-wrap { display: flex; align-items: center; gap: 0.75rem; }
+
+    .diag-rank {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .rank-1 { background: var(--emerald); color: var(--navy); }
+    .rank-other { background: rgba(255,255,255,0.1); color: var(--white); }
+
+    .diag-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+    }
+
+    .diag-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(0,200,150,0.12);
+      color: var(--emerald);
+      border: 1px solid rgba(0,200,150,0.25);
+    }
+
+    .diag-body { padding: 1.25rem 1.5rem; }
+
+    .meds-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .med-list { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
+
+    .med-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      font-size: 0.875rem;
+      line-height: 1.45;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .med-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--emerald);
+      flex-shrink: 0;
+      margin-top: 0.45rem;
+    }
+
+    /* ── Learn More panel ── */
+    .learn-more-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      border: none;
+      color: var(--emerald);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0.75rem 1.5rem;
+      border-top: 1px solid var(--glass-border);
+      width: 100%;
+      text-align: left;
+      letter-spacing: 0.01em;
+      transition: background 0.2s;
+    }
+    .learn-more-btn:hover { background: rgba(0,200,150,0.05); }
+    .learn-more-btn svg { transition: transform 0.3s; flex-shrink: 0; }
+    .learn-more-btn.open svg { transform: rotate(180deg); }
+
+    .info-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .info-panel.open { max-height: 1000px; }
+
+    .info-inner {
+      padding: 1.25rem 1.5rem 1.5rem;
+      border-top: 1px solid var(--glass-border);
+      background: rgba(0,0,0,0.15);
+    }
+
+    .info-loading {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .info-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--glass-border);
+      border-top-color: var(--emerald);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .info-content {
+      font-size: 0.875rem;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.88);
+    }
+
+    /* Render markdown-like bold and bullets from Claude's response */
+    .info-content .info-section { margin-bottom: 1rem; }
+    .info-content .info-section:last-child { margin-bottom: 0; }
+    .info-content strong { color: var(--emerald); font-weight: 600; }
+    .info-content ul { list-style: none; padding: 0; margin: 0.4rem 0 0; display: flex; flex-direction: column; gap: 0.35rem; }
+    .info-content ul li { display: flex; gap: 0.5rem; align-items: flex-start; }
+    .info-content ul li::before { content: '·'; color: var(--emerald); font-size: 1rem; line-height: 1.4; flex-shrink: 0; }
+
+    /* ── Actions ── */
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 2.5rem;
+      animation: fadeUp 0.9s ease both;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.5rem;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--emerald);
+      color: var(--navy);
+      border: none;
+    }
+    .btn-primary:hover { background: #00a37a; }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--white);
+      border: 1px solid var(--glass-border);
+    }
+    .btn-outline:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05); }
+
+    /* ── Warning banner ── */
+    .warning-banner {
+      display: flex;
+      gap: 0.75rem;
+      background: rgba(255,107,107,0.08);
+      border: 1px solid rgba(255,107,107,0.25);
+      border-radius: 14px;
+      padding: 1.1rem 1.3rem;
+      margin-top: 2rem;
+      font-size: 0.83rem;
+      color: #ffb3b3;
+      line-height: 1.55;
+      animation: fadeUp 1s ease both;
+    }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      header, .actions, .warning-banner { display: none !important; }
+      .diag-card { border: 1px solid #ccc !important; break-inside: avoid; }
+      .diag-name, .page-header h1 { color: #000 !important; }
+      .chip, .med-list li { color: #333 !important; }
+      .meds-label, .section-label, .page-header p { color: #555 !important; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <div class="logo-icon">🩺</div>
+    Medi<em>Buddy</em> AI
+  </a>
+</header>
+
+<div class="main">
+  <!-- Page heading -->
+  <div class="page-header">
+    <div class="page-header-icon">🩺</div>
+    <div>
+      <h1>Diagnosis Result</h1>
+      <p>Based on {{ symptoms | length }} reported symptom{{ 's' if symptoms | length != 1 }}</p>
+    </div>
+  </div>
+
+  <!-- Symptom chips -->
+  <div class="section-label">Your Symptoms</div>
+  <div class="chips">
+    {% for symptom in symptoms %}
+      {% set sev = severities[loop.index0] | int if severities and loop.index0 < severities | length else 1 %}
+      {% set colors = ['#4ade80','#a3e635','#fbbf24','#f97316','#ef4444'] %}
+      <div class="chip">
+        <span class="chip-sev" style="background: {{ colors[sev-1] }}"></span>
+        {{ symptom }} <span style="color:var(--muted); font-size:0.75rem">&nbsp;sev {{ sev }}</span>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Diagnoses -->
+  <div class="section-label">Predicted Condition{{ 's' if diagnoses | length != 1 }}</div>
+  <div class="diagnoses">
+    {% for illness, medicines, score in diagnoses %}
+      <div class="diag-card {{ 'primary' if loop.first }}">
+        <div class="diag-header">
+          <div class="diag-name-wrap">
+            <div class="diag-rank {{ 'rank-1' if loop.first else 'rank-other' }}">{{ loop.index }}</div>
+            <div class="diag-name">{{ illness }}</div>
+          </div>
+          {% if loop.first %}
+            <div class="diag-badge">Top Match</div>
+          {% endif %}
+        </div>
+        <div class="diag-body">
+          <div class="meds-label">Suggested Remedies</div>
+          <ul class="med-list">
+            {% for med in medicines %}
+              <li>
+                <span class="med-dot"></span>
+                <span>{{ med }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Learn More toggle -->
+        <button class="learn-more-btn" onclick="toggleInfo(this, '{{ illness }}')">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M7 6v4M7 4.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          Learn about {{ illness }}
+          <svg style="margin-left:auto" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <div class="info-panel" id="info-{{ loop.index }}">
+          <div class="info-inner">
+            <div class="info-loading">
+              <div class="info-spinner"></div>
+              <span>Loading disease information…</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <a href="/" class="btn btn-primary">
+      ← Check again
+    </a>
+    <button onclick="window.print()" class="btn btn-outline">
+      🖨 Save as PDF
+    </button>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="warning-banner">
+    <span>⚠️</span>
+    <span><strong>Medical disclaimer:</strong> These results are for informational purposes only and do not constitute a medical diagnosis. Always consult a qualified doctor before taking any medication. In case of emergency, call your local emergency services immediately.</span>
+  </div>
+</div>
+
+<script>
+  // Symptoms passed from Flask for context
+  const PAGE_SYMPTOMS = {{ symptoms | tojson }};
+
+  // Track which panels have already loaded
+  const loaded = {};
+
+  function toggleInfo(btn, disease) {
+    const idx = btn.closest('.diag-card').querySelector('.info-panel').id.split('-')[1];
+    const panel = document.getElementById(`info-${idx}`);
+
+    btn.classList.toggle('open');
+    panel.classList.toggle('open');
+
+    // Fetch only once per disease
+    if (panel.classList.contains('open') && !loaded[disease]) {
+      loaded[disease] = true;
+      fetchInfo(panel, disease);
+    }
+  }
+
+  async function fetchInfo(panel, disease) {
+    try {
+      const res = await fetch('/disease-info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ disease, symptoms: PAGE_SYMPTOMS })
+      });
+      const data = await res.json();
+      panel.querySelector('.info-inner').innerHTML =
+        `<div class="info-content">${renderMarkdown(data.info)}</div>`;
+    } catch {
+      panel.querySelector('.info-inner').innerHTML =
+        `<div class="info-content" style="color:var(--danger)">⚠️ Could not load information. Please try again.</div>`;
+    }
+  }
+
+  function renderMarkdown(text) {
+    // Convert **heading** lines to styled sections, bullet lines to <ul>
+    const lines = text.split('\n');
+    let html = '';
+    let inUl = false;
+
+    for (let line of lines) {
+      line = line.trim();
+      if (!line) {
+        if (inUl) { html += '</ul>'; inUl = false; }
+        continue;
+      }
+
+      // **Bold heading**
+      if (/^\*\*(.+)\*\*$/.test(line)) {
+        if (inUl) { html += '</ul>'; inUl = false; }
+        html += `<div class="info-section"><strong>${line.replace(/\*\*/g,'')}</strong><br>`;
+        continue;
+      }
+
+      // Bullet: - item or • item
+      if (/^[-•]\s/.test(line)) {
+        if (!inUl) { html += '<ul>'; inUl = true; }
+        html += `<li>${escHtml(line.replace(/^[-•]\s/,''))}</li>`;
+        continue;
+      }
+
+      // Normal line
+      if (inUl) { html += '</ul>'; inUl = false; }
+      // inline **bold**
+      const formatted = escHtml(line).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html += formatted + ' ';
+    }
+
+    if (inUl) html += '</ul>';
+    // Close any unclosed info-section divs roughly
+    html += '</div>';
+    return html;
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+</script>
+</body>
+</html>
