@@ -1,3 +1,5 @@
+## Live Demo
+https://medibuddy-ai.onrender.com
 # 🩺 MediBuddy — AI Symptom Checker
 
 > An intelligent medical symptom checker that suggests possible diagnoses and provides friendly health information powered by AI.
@@ -87,3 +89,6 @@ MediBuddy is for **educational and informational purposes only**. It is not a su
 
 Built by [Your Name] — [your LinkedIn or GitHub link]
 ```
+## Dataset
+Download from Kaggle and place in root folder as:
+`Disease and symptoms dataset.csv`
