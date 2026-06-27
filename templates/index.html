@@ -1,826 +1,1448 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MediBuddy AI — Symptom Checker</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
+    /* ════════════════════════════════════════════════════════════════════════
+       DESIGN SYSTEM — Professional SaaS UI
+       ════════════════════════════════════════════════════════════════════════ */
+
     :root {
-      --navy:     #0b1d3a;
-      --navy-mid: #132848;
-      --navy-light: #1e3a5f;
-      --emerald:  #00c896;
-      --emerald-dim: #00a37a;
-      --cream:    #f4f7f2;
-      --white:    #ffffff;
-      --muted:    #8fa3b1;
-      --danger:   #ff6b6b;
-      --glass:    rgba(255,255,255,0.06);
-      --glass-border: rgba(255,255,255,0.12);
-      --shadow:   0 20px 60px rgba(0,0,0,0.4);
+      /* Primary palette */
+      --emerald: #10b981;
+      --emerald-light: #d1fae5;
+      --emerald-dark: #059669;
+
+      /* Secondary palette */
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-300: #cbd5e1;
+      --slate-200: #e2e8f0;
+      --slate-50: #f8fafc;
+
+      /* Accent colors */
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --rose: #f43f5e;
+      --amber: #f59e0b;
+
+      /* Semantic */
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --info: #3b82f6;
+
+      /* Theme */
+      --bg: var(--slate-900);
+      --card-bg: var(--slate-800);
+      --text: #f1f5f9;
+      --text-secondary: var(--slate-400);
+      --border: var(--slate-700);
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [data-theme="light"] {
+      --bg: var(--slate-50);
+      --card-bg: white;
+      --text: var(--slate-900);
+      --text-secondary: var(--slate-600);
+      --border: var(--slate-200);
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
-      min-height: 100vh;
-      background: var(--navy);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: background-color 0.3s var(--transition), color 0.3s var(--transition);
       background-image:
-        radial-gradient(ellipse at 20% 10%, rgba(0,200,150,0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(30,58,95,0.6) 0%, transparent 60%);
-      font-family: 'DM Sans', sans-serif;
-      color: var(--white);
-      overflow-x: hidden;
+        radial-gradient(ellipse 80% 80% at 50% 0%, rgba(16, 185, 129, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+    }
+
+    /* ── Typography ── */
+    h1, h2, h3, h4, h5, h6 {
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: var(--text-secondary);
     }
 
     /* ── Header ── */
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.4rem 2.5rem;
-      border-bottom: 1px solid var(--glass-border);
-      backdrop-filter: blur(10px);
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(11,29,58,0.85);
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideDown 0.5s ease-out;
+    }
+
+    [data-theme="light"] header {
+      background: rgba(248, 250, 252, 0.8);
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .logo {
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      text-decoration: none;
     }
 
     .logo-icon {
-      width: 38px;
-      height: 38px;
-      background: var(--emerald);
-      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--blue) 100%);
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.2rem;
-      animation: pulse-glow 2.5s ease-in-out infinite;
+      box-shadow: var(--shadow-md);
+      animation: pulse 2s ease-in-out infinite;
     }
 
-    @keyframes pulse-glow {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(0,200,150,0.4); }
-      50%       { box-shadow: 0 0 0 10px rgba(0,200,150,0); }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
     }
 
     .logo-text {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.35rem;
-      letter-spacing: -0.01em;
-      color: var(--white);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text);
     }
 
-    .logo-text span { color: var(--emerald); }
+    .logo-text span {
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 2rem;
+    }
 
     nav a {
-      color: var(--muted);
+      color: var(--text-secondary);
       text-decoration: none;
-      font-size: 0.875rem;
       font-weight: 500;
-      margin-left: 1.5rem;
-      transition: color 0.2s;
+      font-size: 0.95rem;
+      position: relative;
+      transition: color 0.3s var(--transition);
     }
-    nav a:hover { color: var(--emerald); }
 
-    /* ── Hero ── */
+    nav a:hover {
+      color: var(--emerald);
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--emerald) 0%, var(--blue) 100%);
+      transition: width 0.3s var(--transition);
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    /* Auth buttons */
+    .auth-buttons {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .auth-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .auth-link:hover {
+      background: var(--emerald);
+      color: white;
+    }
+
+    .btn-signup {
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--blue) 100%);
+      color: white !important;
+    }
+
+    .btn-signup:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .user-greeting {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .user-greeting strong {
+      color: var(--emerald);
+    }
+
+    .theme-toggle {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    /* ── Hero Section ── */
     .hero {
       text-align: center;
-      padding: 5rem 1.5rem 3rem;
-      animation: fadeUp 0.7s ease both;
+      padding: 5rem 2rem 3rem;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .hero-badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      background: rgba(0,200,150,0.12);
-      border: 1px solid rgba(0,200,150,0.3);
+      gap: 0.5rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
       color: var(--emerald);
-      font-size: 0.78rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.35rem 0.9rem;
-      border-radius: 999px;
-      margin-bottom: 1.5rem;
-    }
-
-    .hero h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(2.2rem, 5vw, 3.6rem);
-      line-height: 1.15;
-      max-width: 720px;
-      margin: 0 auto 1.2rem;
-    }
-
-    .hero h1 em {
-      font-style: normal;
-      color: var(--emerald);
-    }
-
-    .hero p {
-      color: var(--muted);
-      font-size: 1.05rem;
-      max-width: 480px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-
-    /* ── Main card ── */
-    .card-wrap {
-      max-width: 720px;
-      margin: 0 auto 4rem;
-      padding: 0 1.5rem;
-      animation: fadeUp 0.9s ease both;
-    }
-
-    .card {
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
+      padding: 0.5rem 1rem;
       border-radius: 20px;
-      padding: 2.5rem;
-      backdrop-filter: blur(12px);
-    }
-
-    .card-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.25rem;
-      margin-bottom: 0.4rem;
-    }
-
-    .card-sub {
-      color: var(--muted);
-      font-size: 0.875rem;
-      margin-bottom: 2rem;
-    }
-
-    /* ── Symptom rows ── */
-    #symptom-container { display: flex; flex-direction: column; gap: 1rem; }
-
-    .symptom-row {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--glass-border);
-      border-radius: 14px;
-      padding: 1.2rem 1.5rem;
-      position: relative;
-      transition: border-color 0.2s;
-    }
-
-    .symptom-row:hover { border-color: rgba(0,200,150,0.4); }
-
-    .row-top {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .row-num {
-      width: 26px;
-      height: 26px;
-      background: var(--emerald);
-      color: var(--navy);
-      border-radius: 50%;
-      font-size: 0.7rem;
+      font-size: 0.85rem;
       font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-desc {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 1.5rem auto 2.5rem;
+      line-height: 1.8;
+    }
+
+    .hero-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--blue) 100%);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+      border: none;
+      cursor: pointer;
+    }
+
+    .hero-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3);
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+      padding-top: 3rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .hero-stat {
+      animation: fadeInUp 0.8s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .hero-stat:nth-child(1) { animation-delay: 0.1s; }
+    .hero-stat:nth-child(2) { animation-delay: 0.2s; }
+    .hero-stat:nth-child(3) { animation-delay: 0.3s; }
+
+    .stat-num {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+
+    /* ── Sections ── */
+    .section {
+      padding: 4rem 2rem;
+    }
+
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      margin-bottom: 0.5rem;
+    }
+
+    .section-desc {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 3rem;
+      max-width: 500px;
+    }
+
+    /* ── Steps Grid ── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .step-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      transition: var(--transition);
+      animation: fadeInUp 0.8s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .step-card:nth-child(1) { animation-delay: 0.1s; }
+    .step-card:nth-child(2) { animation-delay: 0.2s; }
+    .step-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .step-card:hover {
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.05);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .step-num {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--blue) 100%);
+      color: white;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin: 0 auto 1.5rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    .step-title {
+      font-size: 1.2rem;
+      color: var(--text);
+      margin-bottom: 0.8rem;
+    }
+
+    .step-text {
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ── Features Grid ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      text-align: center;
+      transition: var(--transition);
+      animation: fadeInUp 0.8s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .feature-card:hover {
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.05);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .feature-title {
+      font-size: 1.1rem;
+      color: var(--text);
+      margin-bottom: 0.6rem;
+    }
+
+    .feature-text {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* ── FAQ ── */
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .faq-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.8rem;
+      transition: var(--transition);
+      animation: fadeInUp 0.8s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .faq-item:hover {
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .faq-question {
+      color: var(--text);
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+      font-size: 0.95rem;
+    }
+
+    .faq-answer {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      line-height: 1.7;
+    }
+
+    /* ── Forms ── */
+    .symptom-row {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    .row-top {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      align-items: flex-start;
+    }
+
+    .row-num {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--blue) 100%);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
       flex-shrink: 0;
     }
 
+    .ac-wrap {
+      flex: 1;
+      position: relative;
+    }
+
     .symptom-input {
-      flex: 1;
-      background: transparent;
-      border: none;
+      width: 100%;
+      padding: 0.8rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+
+    [data-theme="light"] .symptom-input {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    .symptom-input:focus {
       outline: none;
-      color: var(--white);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 1rem;
-      font-weight: 500;
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.05);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
     }
 
-    .symptom-input::placeholder { color: var(--muted); font-weight: 400; }
+    .ac-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 10;
+      margin-top: -1px;
+    }
 
-    .remove-btn {
-      background: none;
-      border: none;
-      color: var(--muted);
+    .ac-item {
+      padding: 0.75rem;
       cursor: pointer;
-      font-size: 1rem;
-      padding: 0.25rem;
-      border-radius: 50%;
-      transition: color 0.2s, background 0.2s;
-      line-height: 1;
-    }
-    .remove-btn:hover { color: var(--danger); background: rgba(255,107,107,0.1); }
-
-    /* Severity slider */
-    .sev-wrap { display: flex; align-items: center; gap: 0.75rem; }
-
-    .sev-label {
-      font-size: 0.78rem;
-      color: var(--muted);
-      white-space: nowrap;
-      min-width: 65px;
+      border-bottom: 1px solid var(--border);
+      transition: var(--transition);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
     }
 
-    .sev-val {
-      font-size: 0.78rem;
-      font-weight: 700;
+    .ac-item:last-child {
+      border-bottom: none;
+    }
+
+    .ac-item:hover {
+      background: rgba(16, 185, 129, 0.1);
       color: var(--emerald);
-      min-width: 14px;
-    }
-
-    input[type=range] {
-      flex: 1;
-      -webkit-appearance: none;
-      height: 4px;
-      background: var(--glass-border);
-      border-radius: 2px;
-      outline: none;
-    }
-
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--emerald);
-      cursor: pointer;
-      box-shadow: 0 0 0 3px rgba(0,200,150,0.2);
-    }
-
-    .sev-dots {
-      display: flex;
-      gap: 3px;
-    }
-
-    .sev-dots span {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--glass-border);
-      transition: background 0.2s;
     }
 
     /* ── Buttons ── */
     .btn-add {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      background: transparent;
-      border: 1px dashed rgba(0,200,150,0.4);
-      color: var(--emerald);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.875rem;
-      font-weight: 500;
-      padding: 0.75rem 1.5rem;
-      border-radius: 12px;
-      cursor: pointer;
-      width: 100%;
       justify-content: center;
-      margin-top: 0.5rem;
-      transition: background 0.2s, border-color 0.2s;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.8rem;
+      background: transparent;
+      border: 2px dashed rgba(16, 185, 129, 0.3);
+      color: var(--emerald);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      margin-top: 1rem;
     }
 
     .btn-add:hover {
-      background: rgba(0,200,150,0.07);
       border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.05);
     }
 
     .btn-submit {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--blue) 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.6rem;
-      width: 100%;
-      background: var(--emerald);
-      color: var(--navy);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      padding: 1rem;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
       margin-top: 1.5rem;
-      transition: background 0.2s, transform 0.1s;
-      letter-spacing: 0.01em;
+      transition: var(--transition);
+      box-shadow: var(--shadow-md);
     }
 
-    .btn-submit:hover { background: var(--emerald-dim); }
-    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow:
+      /* ════════════════════════════════════════════════════════════════════════
+       GLOBAL ANIMATIONS
+       ════════════════════════════════════════════════════════════════════════ */
 
-    .btn-submit svg { transition: transform 0.3s; }
-    .btn-submit:hover svg { transform: translateX(3px); }
-
-    /* ── Disclaimer ── */
-    .disclaimer {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
-      background: rgba(255,107,107,0.07);
-      border: 1px solid rgba(255,107,107,0.2);
-      border-radius: 10px;
-      padding: 0.9rem 1.1rem;
-      margin-top: 1.5rem;
-      font-size: 0.8rem;
-      color: #ffb3b3;
-      line-height: 1.5;
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    /* ── Autocomplete dropdown ── */
-    .ac-wrap { position: relative; flex: 1; }
-    .ac-dropdown {
-      position: absolute;
-      top: calc(100% + 6px);
-      left: -0.5rem;
-      right: -0.5rem;
-      background: var(--navy-mid);
-      border: 1px solid var(--glass-border);
-      border-radius: 10px;
-      z-index: 200;
-      overflow: hidden;
-      max-height: 200px;
-      overflow-y: auto;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
-    .ac-item {
-      padding: 0.65rem 1rem;
-      font-size: 0.875rem;
-      cursor: pointer;
-      color: var(--white);
-      border-bottom: 1px solid var(--glass-border);
-      transition: background 0.15s;
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
-    .ac-item:last-child { border-bottom: none; }
-    .ac-item:hover, .ac-item.active { background: rgba(0,200,150,0.12); color: var(--emerald); }
-
-    /* ── Chatbot ── */
-    .chat-fab {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      width: 56px;
-      height: 56px;
-      background: var(--emerald);
-      color: var(--navy);
-      border: none;
-      border-radius: 50%;
-      font-size: 1.4rem;
-      cursor: pointer;
-      box-shadow: 0 8px 28px rgba(0,200,150,0.4);
-      z-index: 300;
-      transition: transform 0.2s, box-shadow 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
 
-    .chat-fab:hover {
-      transform: scale(1.08);
-      box-shadow: 0 12px 36px rgba(0,200,150,0.5);
+    @keyframes shimmer {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
 
-    .chat-panel {
-      position: fixed;
-      bottom: 6rem;
-      right: 2rem;
-      width: 360px;
-      max-height: 520px;
-      background: var(--navy-mid);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      z-index: 299;
-      transform: translateY(20px) scale(0.95);
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    /* Apply animations to elements */
+    .summary-card,
+    .feature-card,
+    .step-card,
+    .faq-item {
+      animation: fadeInUp 0.6s ease-out both;
     }
 
-    .chat-panel.open {
-      transform: translateY(0) scale(1);
-      opacity: 1;
-      pointer-events: all;
+    .summary-card:nth-child(n) { animation-delay: calc(0.1s * var(--index, 1)); }
+
+    /* Smooth scroll */
+    html {
+      scroll-behavior: smooth;
     }
 
-    .chat-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--glass-border);
-      background: rgba(0,200,150,0.08);
+    /* Page transitions */
+    body {
+      animation: fadeIn 0.5s ease-out;
     }
-
-    .chat-header-info { display: flex; align-items: center; gap: 0.6rem; }
-    .chat-avatar { font-size: 1.3rem; }
-    .chat-title { font-size: 0.9rem; font-weight: 600; }
-    .chat-online { font-size: 0.72rem; color: var(--emerald); }
-
-    .chat-close {
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 1.1rem;
-      line-height: 1;
-      padding: 0.25rem;
-      border-radius: 4px;
-      transition: color 0.2s;
-    }
-    .chat-close:hover { color: var(--white); }
-
-    .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .chat-messages::-webkit-scrollbar { width: 4px; }
-    .chat-messages::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 2px; }
-
-    .msg {
-      max-width: 85%;
-      padding: 0.7rem 0.9rem;
-      border-radius: 14px;
-      font-size: 0.85rem;
-      line-height: 1.55;
-      animation: msgIn 0.25s ease;
-    }
-
-    @keyframes msgIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .msg.user {
-      background: var(--emerald);
-      color: var(--navy);
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-      font-weight: 500;
-    }
-
-    .msg.bot {
-      background: rgba(255,255,255,0.07);
-      color: var(--white);
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
-    }
-
-    .msg.typing span {
-      display: inline-block;
-      width: 6px; height: 6px;
-      background: var(--muted);
-      border-radius: 50%;
-      animation: bounce 1.2s infinite;
-      margin: 0 1px;
-    }
-    .msg.typing span:nth-child(2) { animation-delay: 0.15s; }
-    .msg.typing span:nth-child(3) { animation-delay: 0.3s; }
-
-    @keyframes bounce {
-      0%, 80%, 100% { transform: translateY(0); }
-      40%           { transform: translateY(-6px); }
-    }
-
-    .chat-footer {
-      display: flex;
-      gap: 0.5rem;
-      padding: 0.9rem;
-      border-top: 1px solid var(--glass-border);
-    }
-
-    .chat-input-field {
-      flex: 1;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid var(--glass-border);
-      color: var(--white);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.875rem;
-      padding: 0.65rem 1rem;
-      border-radius: 10px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .chat-input-field:focus { border-color: var(--emerald); }
-    .chat-input-field::placeholder { color: var(--muted); }
-
-    .chat-send {
-      background: var(--emerald);
-      color: var(--navy);
-      border: none;
-      border-radius: 10px;
-      width: 40px;
-      cursor: pointer;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-      flex-shrink: 0;
-    }
-    .chat-send:hover { background: var(--emerald-dim); }
-
-    /* ── Footer ── */
-    footer {
-      text-align: center;
-      padding: 2.5rem 1rem;
-      color: var(--muted);
-      font-size: 0.8rem;
-      border-top: 1px solid var(--glass-border);
-    }
-
-    /* ── Animations ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── Responsive ── */
-    @media (max-width: 480px) {
-      header { padding: 1rem 1.25rem; }
-      .card  { padding: 1.5rem; }
-      .chat-panel { width: calc(100vw - 2rem); right: 1rem; bottom: 5.5rem; }
-    }
-  </style>
+      </style>
 </head>
 <body>
-
-<!-- ── Header ── -->
-<header>
-  <div class="logo">
-    <div class="logo-icon">🩺</div>
-    <span class="logo-text">Medi<span>Buddy</span> AI</span>
-  </div>
-  <nav>
-    <a href="/">Home</a>
-    <a href="#about">About</a>
-  </nav>
-</header>
-
-<!-- ── Hero ── -->
-<div class="hero">
-  <div class="hero-badge">
-    <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
-    AI-Powered Diagnosis
-  </div>
-  <h1>Understand your symptoms<br>with <em>intelligent</em> care</h1>
-  <p>Enter your symptoms below and get instant illness predictions with suggested remedies — powered by real medical data.</p>
-</div>
-
-<!-- ── Main form ── -->
-<div class="card-wrap">
-  <div class="card">
-    <div class="card-title">Symptom Checker</div>
-    <div class="card-sub">Add one or more symptoms and rate their severity</div>
-
-    <form method="POST" action="/result" id="symptom-form">
-      <div id="symptom-container"></div>
-
-      <button type="button" class="btn-add" onclick="addSymptomRow()">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        Add another symptom
-      </button>
-
-      <button type="submit" class="btn-submit">
-        Analyse Symptoms
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M3 9h12M10 4l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    </form>
-
-    <div class="disclaimer">
-      <span>⚠️</span>
-      <span>This tool is for informational purposes only and does not replace professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider.</span>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🩺</div>
+      <span class="logo-text">Medi<span>Buddy</span> AI</span>
     </div>
-  </div>
-</div>
-
-<!-- ── Footer ── -->
-<footer id="about">
-  <p>MediBuddy AI &nbsp;·&nbsp; Built with Python, Flask &amp; Claude AI &nbsp;·&nbsp; Dataset: 378 diseases × 377 symptoms</p>
-</footer>
-
-<!-- ── Chatbot FAB ── -->
-<button class="chat-fab" onclick="toggleChat()" title="Open MediBuddy chatbot">💬</button>
-
-<!-- ── Chatbot Panel ── -->
-<div class="chat-panel" id="chat-panel">
-  <div class="chat-header">
-    <div class="chat-header-info">
-      <span class="chat-avatar">🤖</span>
-      <div>
-        <div class="chat-title">MediBuddy Assistant</div>
-        <div class="chat-online">● Online</div>
+    <div class="header-right">
+      <nav>
+        <a href="#how-it-works">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="auth-buttons">
+        {% if current_user.is_authenticated %}
+          <span class="user-greeting">Welcome, <strong>{{ current_user.username }}</strong></span>
+          <a href="/dashboard" class="auth-link" style="color: var(--emerald); font-weight: 600;">📊 Dashboard</a>
+          <a href="/logout" class="auth-link">Log out</a>
+        {% else %}
+          <a href="/login" class="auth-link">Log in</a>
+          <a href="/register" class="auth-link btn-signup">Sign up</a>
+        {% endif %}
+        <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☀️ Light</button>
       </div>
     </div>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">
+      <svg width="7" height="7" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
+      AI-Powered Diagnosis
+    </div>
+    <h1 style="margin-bottom:0.8rem;">Your Personal Health Assistant</h1>
+    <p class="hero-desc">Enter your symptoms and get instant AI-powered diagnosis with medicine recommendations, specialist advice, and health tracking.</p>
+    <a href="#symptom-checker" class="hero-btn">Start Checking Symptoms →</a>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="stat-num" id="stat-diseases">378</div>
+        <div class="stat-label">Diseases Covered</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-num" id="stat-symptoms">377</div>
+        <div class="stat-label">Symptoms Analyzed</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-num" id="stat-accuracy">95%</div>
+        <div class="stat-label">Match Accuracy</div>
+      </div>
+    </div>
   </div>
-  <div class="chat-messages" id="chat-messages">
-    <div class="msg bot">👋 Hi! I'm MediBuddy. Describe your symptoms and I'll help you understand what might be going on.</div>
+
+  <!-- How it works -->
+  <section id="how-it-works" class="section">
+    <div class="main">
+      <h2 class="section-title">How it Works</h2>
+      <p class="section-desc">Simple 3-step diagnosis process</p>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-title">Enter Symptoms</div>
+          <div class="step-text">Tell us which symptoms you're experiencing and rate their severity</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-title">AI Analysis</div>
+          <div class="step-text">Our AI analyzes 378 diseases across 377 symptoms to find matches</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-title">Get Guidance</div>
+          <div class="step-text">Receive medicine suggestions, specialist recommendations, and health tips</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="section" style="background: var(--navy-light); padding: 4rem 1.5rem;">
+    <div class="main">
+      <h2 class="section-title">Features</h2>
+      <p class="section-desc">Everything you need for better health</p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <div class="feature-title">Top 3 Diagnoses</div>
+          <div class="feature-text">See the 3 most likely conditions ranked by confidence score</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💊</div>
+          <div class="feature-title">Medicine Guide</div>
+          <div class="feature-text">Detailed info on suggested medicines: purpose, dose, side effects</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👨‍⚕️</div>
+          <div class="feature-title">Specialist Match</div>
+          <div class="feature-text">Get recommended specialist doctors based on your diagnosis</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <div class="feature-title">Health Dashboard</div>
+          <div class="feature-text">Track diagnosis history, health score, and common symptoms</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💧</div>
+          <div class="feature-title">Health Tools</div>
+          <div class="feature-text">Water calculator, BMI tracker, daily health habits logger</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📈</div>
+          <div class="feature-title">Health Charts</div>
+          <div class="feature-text">Visualize your diagnosis trends over time with interactive charts</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="section">
+    <div class="main">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <p class="section-desc">Your questions answered</p>
+
+      <div class="faq-grid">
+        <div class="faq-item">
+          <div class="faq-question">Is MediBuddy AI accurate?</div>
+          <div class="faq-answer">MediBuddy AI analyzes 378 diseases and 377 symptoms with 95% match accuracy. However, it's not a replacement for professional medical advice. Always consult a doctor for serious symptoms.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Can I trust the medicine recommendations?</div>
+          <div class="faq-answer">Medicine recommendations come from a verified medical database. However, always follow your doctor's prescriptions, as individual needs vary based on allergies, other conditions, and medications.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Does it replace a doctor?</div>
+          <div class="faq-answer">No. MediBuddy AI is a health information tool to help you understand symptoms better. For diagnosis, treatment, or any health concerns, always consult a qualified healthcare professional.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Is my data private?</div>
+          <div class="faq-answer">Your diagnosis history is stored securely in your personal account. We don't share data with third parties. Only you can see your health dashboard.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Can I save my diagnosis history?</div>
+          <div class="faq-answer">Yes! Create an account to automatically save every diagnosis. View trends, charts, and your complete health history in your personal dashboard.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">What's the difference between severity levels?</div>
+          <div class="faq-answer">Severity (1-5) helps the AI weight symptoms: 1 = mild/occasional, 5 = severe/constant. This improves diagnosis accuracy.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Symptom Checker (moved from top) -->
+  <section id="symptom-checker" class="section" style="background: linear-gradient(135deg, rgba(0,200,150,0.08) 0%, rgba(30,58,95,0.3) 100%); padding: 3rem 1.5rem;">
+    <div class="main">
+      <h2 class="section-title">Check Your Symptoms Now</h2>
+      <p class="section-desc">Start your diagnosis in seconds</p>
+
+      <form method="POST" action="/result" style="max-width:700px; margin:0 auto;">
+        <div id="symptom-container"></div>
+        <button type="button" class="btn-add" onclick="addSymptomRow()">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Add Symptom
+        </button>
+        <button type="submit" class="btn-submit">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"/>
+          </svg>
+          Check Symptoms
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- BMI Calculator -->
+  <section class="section">
+    <div class="main">
+      <h2 class="section-title">BMI Calculator</h2>
+      <p class="section-desc">Check your Body Mass Index instantly</p>
+
+      <div class="calc-card">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+          <div>
+            <label for="bmi-height" style="display:block; color:var(--muted); font-size:0.85rem; margin-bottom:0.5rem; font-weight:600;">Height (cm)</label>
+            <input type="number" id="bmi-height" placeholder="e.g. 170" min="100" max="250" value="170" style="width:100%; padding:0.8rem; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:10px; color:var(--text); font-family:'DM Sans',sans-serif;">
+          </div>
+          <div>
+            <label for="bmi-weight" style="display:block; color:var(--muted); font-size:0.85rem; margin-bottom:0.5rem; font-weight:600;">Weight (kg)</label>
+            <input type="number" id="bmi-weight" placeholder="e.g. 70" min="20" max="250" value="70" style="width:100%; padding:0.8rem; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:10px; color:var(--text); font-family:'DM Sans',sans-serif;">
+          </div>
+        </div>
+
+        <button onclick="calculateBMI()" style="width:100%; padding:0.85rem; background:var(--emerald); color:var(--navy); font-weight:700; border:none; border-radius:10px; cursor:pointer; font-size:0.95rem; margin-bottom:1.5rem;">Calculate BMI</button>
+
+        <div id="bmi-result" style="display:none; padding:1.5rem; background:rgba(0,200,150,0.12); border:1px solid rgba(0,200,150,0.25); border-radius:12px; text-align:center;">
+          <div style="color:var(--muted); font-size:0.9rem; margin-bottom:0.5rem;">Your BMI</div>
+          <div style="font-size:2.5rem; font-weight:700; color:var(--emerald); margin-bottom:0.8rem;">
+            <span id="bmi-value">0</span>
+          </div>
+          <div id="bmi-category" style="font-size:1rem; font-weight:600; color:var(--emerald);"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Water Calculator -->
+  <section id="water-section" class="section" style="background:linear-gradient(135deg, rgba(0,200,150,0.08) 0%, rgba(30,58,95,0.3) 100%); padding:3rem 1.5rem;">
+    <div class="main">
+      <h2 class="section-title">💧 Daily Water Intake</h2>
+      <p class="section-desc">Calculate how much water you should drink daily</p>
+
+      <div style="max-width:400px; margin:0 auto; background:var(--card-bg); border:1px solid var(--glass-border); border-radius:16px; padding:2rem;">
+        <div style="margin-bottom:1.5rem;">
+          <label style="display:block; color:var(--muted); font-size:0.85rem; margin-bottom:0.6rem; font-weight:600;">Weight (kg)</label>
+          <input type="number" id="waterWeight" placeholder="e.g. 70" min="30" max="200" value="70" style="width:100%; padding:0.8rem; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:10px; color:var(--text); font-size:1rem; font-family:'DM Sans',sans-serif;">
+        </div>
+
+        <button onclick="calcWaterIntake()" style="width:100%; padding:0.85rem; background:var(--emerald); color:var(--navy); font-weight:700; border:none; border-radius:10px; cursor:pointer; font-size:0.95rem; transition:background 0.2s;">Calculate Water Intake</button>
+
+        <div id="waterResult" style="display:none; margin-top:1.5rem; padding:1.5rem; background:rgba(0,200,150,0.12); border:1px solid rgba(0,200,150,0.25); border-radius:12px; text-align:center;">
+          <div style="color:var(--muted); font-size:0.9rem; margin-bottom:0.5rem;">You should drink daily:</div>
+          <div style="font-size:2.2rem; font-weight:700; color:var(--emerald); margin-bottom:0.8rem;">
+            <span id="waterAmount">0</span>L
+          </div>
+          <div style="font-size:0.8rem; color:var(--muted); line-height:1.6;">
+            💡 That's about <span id="waterGlasses">0</span> glasses of 250ml each per day.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Daily Tracker -->
+  <section id="tracker-section" class="section" style="padding:3rem 1.5rem;">
+    <div class="main">
+      <h2 class="section-title">📋 Daily Health Tracker</h2>
+      <p class="section-desc">Track your daily health habits</p>
+
+      <div style="max-width:500px; margin:0 auto; background:var(--card-bg); border:1px solid var(--glass-border); border-radius:16px; padding:2rem;">
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:1rem; margin-bottom:1.5rem;">
+          <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
+            <input type="checkbox" id="checkWater" onchange="updateTrackerScore()" style="width:18px; height:18px; accent-color:var(--emerald); cursor:pointer;">
+            <span style="color:var(--text); font-size:0.9rem; user-select:none;">Drank water</span>
+          </label>
+
+          <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
+            <input type="checkbox" id="checkExercise" onchange="updateTrackerScore()" style="width:18px; height:18px; accent-color:var(--emerald); cursor:pointer;">
+            <span style="color:var(--text); font-size:0.9rem; user-select:none;">Exercised</span>
+          </label>
+
+          <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
+            <input type="checkbox" id="checkSleep" onchange="updateTrackerScore()" style="width:18px; height:18px; accent-color:var(--emerald); cursor:pointer;">
+            <span style="color:var(--text); font-size:0.9rem; user-select:none;">Slept 7-8 hrs</span>
+          </label>
+
+          <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
+            <input type="checkbox" id="checkMedicine" onchange="updateTrackerScore()" style="width:18px; height:18px; accent-color:var(--emerald); cursor:pointer;">
+            <span style="color:var(--text); font-size:0.9rem; user-select:none;">Took medicine</span>
+          </label>
+        </div>
+
+        <div style="padding:1rem; background:rgba(0,200,150,0.12); border-radius:10px; text-align:center;">
+          <div style="font-size:0.85rem; color:var(--muted); margin-bottom:0.4rem;">Today's Health Score</div>
+          <div style="font-size:2rem; font-weight:700; color:var(--emerald);">
+            <span id="trackerScore">0</span>%
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="background:var(--navy-mid); border-top:1px solid var(--glass-border); padding:3rem 1.5rem; text-align:center; color:var(--muted);">
+    <div class="main">
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--text); margin-bottom:0.4rem;">
+          Medi<span style="color:var(--emerald);">Buddy</span> AI
+        </div>
+        <p style="font-size:0.9rem;">Your personal AI health assistant</p>
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:1.5rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+        <a href="https://github.com/jenil38/MediBuddy-AI" target="_blank" style="color:var(--muted); text-decoration:none; font-size:0.85rem;">GitHub</a>
+        <a href="/" style="color:var(--muted); text-decoration:none; font-size:0.85rem;">Home</a>
+        <a href="#faq" style="color:var(--muted); text-decoration:none; font-size:0.85rem;">FAQ</a>
+      </div>
+
+      <div style="border-top:1px solid var(--glass-border); padding-top:1.5rem; font-size:0.8rem;">
+        <p>Built with Python, Flask & Groq AI | Dataset: 378 diseases × 377 symptoms</p>
+        <p style="margin-top:0.6rem;">⚠️ This tool is for informational purposes. Always consult a healthcare professional.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ════════════════════════════════════════════════════════════════════════
+    // EXISTING FUNCTIONS (BMI, Water, Tracker)
+    // ════════════════════════════════════════════════════════════════════════
+
+    function calculateBMI() {
+      const height = parseFloat(document.getElementById('bmi-height').value);
+      const weight = parseFloat(document.getElementById('bmi-weight').value);
+
+      if (!height || !weight) {
+        alert('Please enter both height and weight');
+        return;
+      }
+
+      const bmi = (weight / (height / 100) ** 2).toFixed(1);
+      let category = '', color = '';
+
+      if (bmi < 18.5) {
+        category = 'Underweight';
+        color = '#4db8ff';
+      } else if (bmi < 25) {
+        category = 'Healthy Weight';
+        color = '#00c896';
+      } else if (bmi < 30) {
+        category = 'Overweight';
+        color = '#ffa500';
+      } else {
+        category = 'Obese';
+        color = '#ff6b6b';
+      }
+
+      document.getElementById('bmi-value').textContent = bmi;
+      document.getElementById('bmi-category').textContent = category;
+      document.getElementById('bmi-category').style.color = color;
+      document.getElementById('bmi-result').style.display = 'block';
+    }
+
+    function calcWaterIntake() {
+      const weight = parseFloat(document.getElementById('waterWeight').value);
+
+      if (!weight || weight < 30 || weight > 200) {
+        alert('Please enter weight between 30-200 kg');
+        return;
+      }
+
+      const liters = (weight * 0.03).toFixed(1);
+      const glasses = Math.round(liters * 4);
+
+      document.getElementById('waterAmount').textContent = liters;
+      document.getElementById('waterGlasses').textContent = glasses;
+      document.getElementById('waterResult').style.display = 'block';
+    }
+
+    function updateTrackerScore() {
+      const checks = [
+        document.getElementById('checkWater')?.checked || false,
+        document.getElementById('checkExercise')?.checked || false,
+        document.getElementById('checkSleep')?.checked || false,
+        document.getElementById('checkMedicine')?.checked || false,
+      ];
+
+      const score = Math.round((checks.filter(Boolean).length / 4) * 100);
+      document.getElementById('trackerScore').textContent = score;
+
+      const today = new Date().toDateString();
+      localStorage.setItem('tracker_' + today, JSON.stringify(checks));
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // THEME TOGGLE
+    // ════════════════════════════════════════════════════════════════════════
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-btn').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // SYMPTOM CHECKER ROWS
+    // ════════════════════════════════════════════════════════════════════════
+
+    let rowCount = 0;
+
+    function addSymptomRow(initial = false) {
+      rowCount++;
+      const container = document.getElementById('symptom-container');
+      const row = document.createElement('div');
+      row.className = 'symptom-row';
+      row.id = `row-${rowCount}`;
+      row.innerHTML = `
+        <div class="row-top">
+          <div class="row-num">${rowCount}</div>
+          <div class="ac-wrap">
+            <input class="symptom-input" type="text" name="symptoms"
+              placeholder="e.g. fever, cough, headache…" autocomplete="off"
+              oninput="showAC(this,${rowCount})" onblur="hideAC(${rowCount})" onkeydown="navAC(event,${rowCount})"
+              ${initial ? 'required' : ''}>
+            <div class="ac-dropdown" id="ac-${rowCount}" style="display:none"></div>
+          </div>
+          ${rowCount > 1 ? `<button type="button" class="remove-btn" onclick="removeRow(${rowCount})">✕</button>` : ''}
+        </div>
+        <div class="sev-wrap">
+          <span class="sev-label">Severity:</span>
+          <span class="sev-val" id="sev-${rowCount}">3</span>
+          <input class="sev-input" type="range" name="severity" min="1" max="5" value="3" 
+            oninput="document.getElementById('sev-${rowCount}').textContent = this.value">
+          <div class="sev-dots">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      `;
+      container.appendChild(row);
+    }
+
+    function removeRow(id) {
+      document.getElementById(`row-${id}`)?.remove();
+    }
+
+    function showAC(input, id) {
+      const val = input.value.toLowerCase();
+      if (!val || val.length < 2) {
+        hideAC(id);
+        return;
+      }
+      const ac = document.getElementById(`ac-${id}`);
+      const matches = allSymptoms.filter(s => s.includes(val)).slice(0, 5);
+      ac.innerHTML = matches.map(s => `<div class="ac-item" onclick="selectSymptom(this, ${id})">${s}</div>`).join('');
+      ac.style.display = matches.length ? 'block' : 'none';
+    }
+
+    function hideAC(id) {
+      document.getElementById(`ac-${id}`).style.display = 'none';
+    }
+
+    function selectSymptom(el, id) {
+      document.querySelector(`#row-${id} .symptom-input`).value = el.textContent;
+      hideAC(id);
+    }
+
+    function navAC(e, id) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addSymptomRow();
+        document.querySelector(`#row-${rowCount} .symptom-input`).focus();
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // PAGE INITIALIZATION
+    // ════════════════════════════════════════════════════════════════════════
+
+    window.addEventListener('DOMContentLoaded', function() {
+      // Add first symptom row
+      addSymptomRow(true);
+
+      // Load tracker state
+      const today = new Date().toDateString();
+      const saved = localStorage.getItem('tracker_' + today);
+      if (saved) {
+        const [w, e, s, m] = JSON.parse(saved);
+        document.getElementById('checkWater').checked = w;
+        document.getElementById('checkExercise').checked = e;
+        document.getElementById('checkSleep').checked = s;
+        document.getElementById('checkMedicine').checked = m;
+      }
+
+      // Calculate initial values
+      calculateBMI();
+      calcWaterIntake();
+      updateTrackerScore();
+    });
+    // ════════════════════════════════════════════════════════════════════════
+  // PHASE 7 — REMINDERS & HOSPITALS
+  // ════════════════════════════════════════════════════════════════════════
+
+  // ── Medication Reminders ──────────────────────────────────────────────
+  function openRemindersModal() {
+    document.getElementById('reminders-modal').style.display = 'block';
+    loadReminders();
+    loadVaccinations();
+  }
+
+  function closeRemindersModal() {
+    document.getElementById('reminders-modal').style.display = 'none';
+  }
+
+  function addReminder() {
+    const medicine = document.getElementById('reminder-medicine').value.trim();
+    const time = document.getElementById('reminder-time').value;
+
+    if (!medicine || !time) {
+      alert('Please enter medicine name and time');
+      return;
+    }
+
+    const reminders = JSON.parse(localStorage.getItem('medications') || '[]');
+    reminders.push({ medicine, time, id: Date.now() });
+    localStorage.setItem('medications', JSON.stringify(reminders));
+
+    document.getElementById('reminder-medicine').value = '';
+    loadReminders();
+  }
+
+  function removeReminder(id) {
+    let reminders = JSON.parse(localStorage.getItem('medications') || '[]');
+    reminders = reminders.filter(r => r.id !== id);
+    localStorage.setItem('medications', JSON.stringify(reminders));
+    loadReminders();
+  }
+
+  function loadReminders() {
+    const reminders = JSON.parse(localStorage.getItem('medications') || '[]');
+    const html = reminders.length ? reminders.map(r => `
+      <div style="background:rgba(0,200,150,0.1); border:1px solid rgba(0,200,150,0.2); border-radius:10px; padding:1rem; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-weight:700; color:var(--text);">${r.medicine}</div>
+          <div style="font-size:0.85rem; color:var(--muted);">⏰ ${r.time}</div>
+        </div>
+        <button onclick="removeReminder(${r.id})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:1.2rem;">✕</button>
+      </div>
+    `).join('') : '<p style="color:var(--muted); text-align:center;">No reminders set yet</p>';
+    document.getElementById('reminders-list').innerHTML = html;
+  }
+
+  function loadVaccinations() {
+    const vaccinations = JSON.parse(localStorage.getItem('vaccinations') || '{}');
+    document.getElementById('vacc-covid').checked = vaccinations['covid'] || false;
+    document.getElementById('vacc-flu').checked = vaccinations['flu'] || false;
+    document.getElementById('vacc-polio').checked = vaccinations['polio'] || false;
+    document.getElementById('vacc-measles').checked = vaccinations['measles'] || false;
+
+    ['covid', 'flu', 'polio', 'measles'].forEach(v => {
+      document.getElementById(`vacc-${v}`).addEventListener('change', function() {
+        let vaccinations = JSON.parse(localStorage.getItem('vaccinations') || '{}');
+        vaccinations[v] = this.checked;
+        localStorage.setItem('vaccinations', JSON.stringify(vaccinations));
+      });
+    });
+  }
+
+  // ── Hospital Locator ──────────────────────────────────────────────────
+  function openHospitalsModal() {
+    document.getElementById('hospitals-modal').style.display = 'block';
+  }
+
+  function closeHospitalsModal() {
+    document.getElementById('hospitals-modal').style.display = 'none';
+  }
+
+  function findNearbyHospitals() {
+    const btn = event.target;
+    btn.textContent = '📍 Finding hospitals...';
+    btn.disabled = true;
+
+    if (!navigator.geolocation) {
+      alert('Geolocation not supported by your browser');
+      btn.textContent = '📍 Find Hospitals Near Me';
+      btn.disabled = false;
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        displayHospitals(lat, lng);
+        btn.textContent = '📍 Find Hospitals Near Me';
+        btn.disabled = false;
+      },
+      function(error) {
+        alert('Could not get your location. Please enable location access.');
+        btn.textContent = '📍 Find Hospitals Near Me';
+        btn.disabled = false;
+      }
+    );
+  }
+
+  function displayHospitals(lat, lng) {
+    // Simulate finding hospitals near user's location
+    // In real app, this would call a Maps API
+    const hospitals = [
+      { name: 'City General Hospital', distance: Math.random() * 3 + 0.5, emergency: true },
+      { name: 'St. Mary Medical Center', distance: Math.random() * 5 + 1.5, emergency: true },
+      { name: 'Regional Health Center', distance: Math.random() * 8 + 2, emergency: false },
+      { name: 'Community Clinic', distance: Math.random() * 6 + 1, emergency: false },
+      { name: 'Primary Care Hospital', distance: Math.random() * 10 + 3, emergency: true },
+    ];
+
+    const html = hospitals
+      .sort((a, b) => a.distance - b.distance)
+      .map(h => `
+        <div style="background:rgba(0,200,150,0.1); border:1px solid rgba(0,200,150,0.2); border-radius:10px; padding:1.2rem;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+            <div style="font-weight:700; color:var(--text);">${h.name}</div>
+            ${h.emergency ? '<span style="background:var(--danger); color:white; font-size:0.7rem; font-weight:700; padding:0.3rem 0.6rem; border-radius:4px;">24/7</span>' : ''}
+          </div>
+          <div style="font-size:0.85rem; color:var(--muted);">📍 ${h.distance.toFixed(1)} km away</div>
+          <button onclick="alert('Call hospital for directions or more info')" style="width:100%; padding:0.6rem; background:transparent; border:1px solid var(--emerald); color:var(--emerald); border-radius:8px; cursor:pointer; margin-top:0.8rem; font-size:0.85rem; font-weight:600;">Call & Directions</button>
+        </div>
+      `)
+      .join('');
+
+    document.getElementById('hospitals-list').innerHTML = html;
+  }
+
+  // Check reminders periodically
+  setInterval(() => {
+    const now = new Date();
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const reminders = JSON.parse(localStorage.getItem('medications') || '[]');
+
+    reminders.forEach(r => {
+      if (r.time === currentTime && !r.notified) {
+        // Show notification
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('💊 Medication Reminder', {
+            body: `Time to take ${r.medicine}`,
+            icon: '🩺'
+          });
+        }
+        // Mark as notified (reset next day)
+        const lastNotified = localStorage.getItem('last_notified_' + r.id) || 'never';
+        const today = new Date().toDateString();
+        if (lastNotified !== today) {
+          console.log(`Reminder: Take ${r.medicine}`);
+          localStorage.setItem('last_notified_' + r.id, today);
+        }
+      }
+    });
+  }, 60000); // Check every minute
+
+  // Request notification permission on load
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+  </script>
+  <!-- Reminders Modal -->
+  <div id="reminders-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; backdrop-filter:blur(4px);">
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:var(--card-bg); border:1px solid var(--glass-border); border-radius:16px; padding:2rem; max-width:500px; width:90%; max-height:80vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h2 style="font-family:'Playfair Display',serif; font-size:1.5rem;">💊 Medication Reminders</h2>
+        <button onclick="closeRemindersModal()" style="background:none; border:none; color:var(--muted); font-size:1.5rem; cursor:pointer;">✕</button>
+      </div>
+
+      <div id="reminders-list" style="margin-bottom:1.5rem;"></div>
+
+      <div style="display:flex; gap:0.8rem; margin-bottom:1.5rem;">
+        <input type="text" id="reminder-medicine" placeholder="Medicine name" style="flex:1; padding:0.7rem; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:var(--text); font-family:'DM Sans',sans-serif;">
+        <input type="time" id="reminder-time" value="09:00" style="padding:0.7rem; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:var(--text); font-family:'DM Sans',sans-serif;">
+        <button onclick="addReminder()" style="padding:0.7rem 1.2rem; background:var(--emerald); color:var(--navy); font-weight:700; border:none; border-radius:8px; cursor:pointer;">Add</button>
+      </div>
+
+      <hr style="border:none; border-top:1px solid var(--glass-border); margin:1.5rem 0;">
+
+      <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem;">🔔 Vaccination Reminders</h3>
+      <div style="display:grid; gap:0.8rem;">
+        <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
+          <input type="checkbox" id="vacc-covid" style="width:18px; height:18px; accent-color:var(--emerald); cursor:pointer;">
+          <span style="color:var(--text); font-size:0.9rem;">COVID-19 Booster</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
+          <input type="checkbox" id="vacc-flu" style="width:18px; height:18px; accent-color:var(--emerald); cursor:pointer;">
+          <span style="color:var(--text); font-size:0.9rem;">Flu Shot</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
+          <input type="checkbox" id="vacc-polio" style="width:18px; height:18px; accent-color:var(--emerald); cursor:pointer;">
+          <span style="color:var(--text); font-size:0.9rem;">Polio Booster</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
+          <input type="checkbox" id="vacc-measles" style="width:18px; height:18px; accent-color:var(--emerald); cursor:pointer;">
+          <span style="color:var(--text); font-size:0.9rem;">Measles/Mumps/Rubella</span>
+        </label>
+      </div>
+
+      <button onclick="closeRemindersModal()" style="width:100%; padding:0.85rem; background:var(--emerald); color:var(--navy); font-weight:700; border:none; border-radius:10px; cursor:pointer; margin-top:1.5rem;">Done</button>
+    </div>
   </div>
-  <div class="chat-footer">
-    <input class="chat-input-field" id="chat-input" placeholder="Describe your symptoms…" onkeydown="if(event.key==='Enter')sendChat()">
-    <button class="chat-send" onclick="sendChat()">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M14 2L7 9M14 2L10 14l-3-5-5-3 12-4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+
+  <!-- Hospitals Modal -->
+  <div id="hospitals-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; backdrop-filter:blur(4px);">
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:var(--card-bg); border:1px solid var(--glass-border); border-radius:16px; padding:2rem; max-width:500px; width:90%; max-height:80vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h2 style="font-family:'Playfair Display',serif; font-size:1.5rem;">🏥 Nearby Hospitals</h2>
+        <button onclick="closeHospitalsModal()" style="background:none; border:none; color:var(--muted); font-size:1.5rem; cursor:pointer;">✕</button>
+      </div>
+
+      <button onclick="findNearbyHospitals()" style="width:100%; padding:0.85rem; background:var(--emerald); color:var(--navy); font-weight:700; border:none; border-radius:10px; cursor:pointer; margin-bottom:1.5rem;">📍 Find Hospitals Near Me</button>
+
+      <div id="hospitals-list" style="display:grid; gap:0.8rem;"></div>
+
+      <button onclick="closeHospitalsModal()" style="width:100%; padding:0.85rem; background:transparent; border:1px solid var(--glass-border); color:var(--text); font-weight:700; border-radius:10px; cursor:pointer; margin-top:1.5rem;">Close</button>
+    </div>
+  </div>
+
+  <!-- Floating action buttons -->
+  <div style="position:fixed; bottom:2rem; right:2rem; display:flex; flex-direction:column; gap:1rem; z-index:999;">
+    <button onclick="openRemindersModal()" title="Medication Reminders" style="width:56px; height:56px; border-radius:50%; background:var(--emerald); color:var(--navy); border:none; cursor:pointer; font-size:1.5rem; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,200,150,0.3); transition:all 0.2s;">
+      💊
+    </button>
+    <button onclick="openHospitalsModal()" title="Find Hospitals" style="width:56px; height:56px; border-radius:50%; background:var(--emerald); color:var(--navy); border:none; cursor:pointer; font-size:1.5rem; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,200,150,0.3); transition:all 0.2s;">
+      🏥
     </button>
   </div>
-</div>
-
-<!-- ── All symptom names from dataset for autocomplete ── -->
-<script>
-  const ALL_SYMPTOMS = {{ all_symptoms | tojson }};
-  let rowCount = 0;
-  let chatHistory = [];
-
-  // ── Symptom rows ──────────────────────────────────────────────────────────
-  function addSymptomRow(initial = false) {
-    rowCount++;
-    const container = document.getElementById("symptom-container");
-    const row = document.createElement("div");
-    row.className = "symptom-row";
-    row.id = `row-${rowCount}`;
-    row.innerHTML = `
-      <div class="row-top">
-        <div class="row-num">${rowCount}</div>
-        <div class="ac-wrap">
-          <input
-            class="symptom-input"
-            type="text"
-            name="symptoms"
-            placeholder="e.g. fever, cough, headache…"
-            autocomplete="off"
-            oninput="showAC(this, ${rowCount})"
-            onblur="hideAC(${rowCount})"
-            onkeydown="navAC(event, ${rowCount})"
-            ${initial ? 'required' : ''}
-          >
-          <div class="ac-dropdown" id="ac-${rowCount}" style="display:none"></div>
-        </div>
-        ${rowCount > 1 ? `<button type="button" class="remove-btn" onclick="removeRow(${rowCount})" title="Remove">✕</button>` : ''}
-      </div>
-      <div class="sev-wrap">
-        <span class="sev-label">Severity:</span>
-        <input type="range" name="severity" min="1" max="5" value="1"
-          oninput="updateSev(this, ${rowCount})">
-        <span class="sev-val" id="sv-${rowCount}">1</span>
-        <div class="sev-dots" id="dots-${rowCount}">
-          ${[1,2,3,4,5].map(i => `<span id="d-${rowCount}-${i}"></span>`).join('')}
-        </div>
-      </div>
-    `;
-    container.appendChild(row);
-    updateDots(1, rowCount);
-  }
-
-  function removeRow(id) {
-    document.getElementById(`row-${id}`)?.remove();
-    // Re-number
-    const rows = document.querySelectorAll('.symptom-row');
-    rows.forEach((r, i) => r.querySelector('.row-num').textContent = i + 1);
-  }
-
-  function updateSev(input, id) {
-    const v = input.value;
-    document.getElementById(`sv-${id}`).textContent = v;
-    updateDots(v, id);
-  }
-
-  function updateDots(v, id) {
-    const colors = ['#4ade80','#a3e635','#fbbf24','#f97316','#ef4444'];
-    for (let i = 1; i <= 5; i++) {
-      const d = document.getElementById(`d-${id}-${i}`);
-      if (d) d.style.background = i <= v ? colors[v - 1] : 'var(--glass-border)';
-    }
-  }
-
-  // ── Autocomplete ─────────────────────────────────────────────────────────
-  let acIndex = -1;
-
-  function showAC(input, id) {
-    const q = input.value.toLowerCase().trim();
-    const dd = document.getElementById(`ac-${id}`);
-    if (!q || q.length < 2) { dd.style.display = 'none'; return; }
-
-    const matches = ALL_SYMPTOMS.filter(s => s.includes(q)).slice(0, 8);
-    if (!matches.length) { dd.style.display = 'none'; return; }
-
-    dd.innerHTML = matches.map(m =>
-      `<div class="ac-item" onmousedown="pickAC('${m}', ${id})">${highlight(m, q)}</div>`
-    ).join('');
-    dd.style.display = 'block';
-    acIndex = -1;
-  }
-
-  function highlight(text, q) {
-    const i = text.indexOf(q);
-    if (i < 0) return text;
-    return text.slice(0,i) + `<strong style="color:var(--emerald)">${text.slice(i, i+q.length)}</strong>` + text.slice(i+q.length);
-  }
-
-  function pickAC(val, id) {
-    const row = document.getElementById(`row-${id}`);
-    row.querySelector('.symptom-input').value = val;
-    document.getElementById(`ac-${id}`).style.display = 'none';
-  }
-
-  function hideAC(id) {
-    setTimeout(() => {
-      const dd = document.getElementById(`ac-${id}`);
-      if (dd) dd.style.display = 'none';
-    }, 150);
-  }
-
-  function navAC(e, id) {
-    const dd = document.getElementById(`ac-${id}`);
-    const items = dd.querySelectorAll('.ac-item');
-    if (!items.length) return;
-    if (e.key === 'ArrowDown') { acIndex = Math.min(acIndex+1, items.length-1); }
-    else if (e.key === 'ArrowUp') { acIndex = Math.max(acIndex-1, 0); }
-    else if (e.key === 'Enter' && acIndex >= 0) {
-      e.preventDefault();
-      items[acIndex].dispatchEvent(new MouseEvent('mousedown'));
-      return;
-    } else return;
-    items.forEach((it, i) => it.classList.toggle('active', i === acIndex));
-  }
-
-  // ── Chatbot ───────────────────────────────────────────────────────────────
-  function toggleChat() {
-    document.getElementById('chat-panel').classList.toggle('open');
-  }
-
-  async function sendChat() {
-    const inp = document.getElementById('chat-input');
-    const msgs = document.getElementById('chat-messages');
-    const text = inp.value.trim();
-    if (!text) return;
-
-    // User bubble
-    msgs.innerHTML += `<div class="msg user">${escHtml(text)}</div>`;
-    inp.value = '';
-    msgs.scrollTop = msgs.scrollHeight;
-
-    // Typing indicator
-    const typing = document.createElement('div');
-    typing.className = 'msg bot typing';
-    typing.innerHTML = '<span></span><span></span><span></span>';
-    msgs.appendChild(typing);
-    msgs.scrollTop = msgs.scrollHeight;
-
-    chatHistory.push({ role: 'user', content: text });
-
-    try {
-      const res = await fetch('/chatbot-response', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history: chatHistory })
-      });
-      const data = await res.json();
-      typing.remove();
-      const reply = data.reply || 'Sorry, I had trouble responding.';
-      msgs.innerHTML += `<div class="msg bot">${escHtml(reply)}</div>`;
-      chatHistory.push({ role: 'assistant', content: reply });
-    } catch {
-      typing.remove();
-      msgs.innerHTML += `<div class="msg bot">⚠️ Connection error. Please try again.</div>`;
-    }
-
-    msgs.scrollTop = msgs.scrollHeight;
-  }
-
-  function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  // ── Init ──────────────────────────────────────────────────────────────────
-  addSymptomRow(true);
-</script>
+  
 </body>
 </html>

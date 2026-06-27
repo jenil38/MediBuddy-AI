@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,351 +7,613 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --navy:      #0b1d3a;
-      --navy-mid:  #132848;
-      --emerald:   #00c896;
-      --cream:     #f4f7f2;
-      --white:     #ffffff;
-      --muted:     #8fa3b1;
-      --danger:    #ff6b6b;
-      --warning:   #fbbf24;
-      --glass:     rgba(255,255,255,0.06);
+      --navy:         #0b1d3a;
+      --navy-mid:     #132848;
+      --emerald:      #00c896;
+      --emerald-dim:  #00a37a;
+      --white:        #ffffff;
+      --muted:        #8fa3b1;
+      --danger:       #ff6b6b;
+      --glass:        rgba(255,255,255,0.06);
       --glass-border: rgba(255,255,255,0.12);
+      --bg:           var(--navy);
+      --card-bg:      var(--glass);
+      --text:         var(--white);
+    }
+    [data-theme="light"] {
+      --bg:           #f0f4f8;
+      --card-bg:      rgba(255,255,255,0.95);
+      --text:         #0b1d3a;
+      --muted:        #5a7184;
+      --glass:        rgba(255,255,255,0.95);
+      --glass-border: rgba(11,29,58,0.12);
+      --navy-mid:     #ffffff;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      min-height: 100vh;
-      background: var(--navy);
+      min-height:100vh;
+      background: var(--bg);
       background-image:
         radial-gradient(ellipse at 20% 10%, rgba(0,200,150,0.07) 0%, transparent 50%),
         radial-gradient(ellipse at 80% 90%, rgba(30,58,95,0.5) 0%, transparent 60%);
-      font-family: 'DM Sans', sans-serif;
-      color: var(--white);
+      font-family:'DM Sans',sans-serif;
+      color:var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    [data-theme="light"] body {
+      background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(0,200,150,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 90%, rgba(200,220,240,0.4) 0%, transparent 60%);
     }
 
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.4rem 2.5rem;
-      border-bottom: 1px solid var(--glass-border);
-      background: rgba(11,29,58,0.85);
-      backdrop-filter: blur(10px);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.2rem 2.5rem; border-bottom:1px solid var(--glass-border);
+      background:rgba(11,29,58,0.85); backdrop-filter:blur(10px);
     }
+    [data-theme="light"] header { background:rgba(255,255,255,0.9); }
 
     .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-family: 'Playfair Display', serif;
-      font-size: 1.2rem;
-      text-decoration: none;
-      color: var(--white);
+      display:flex; align-items:center; gap:0.75rem;
+      font-family:'Playfair Display',serif; font-size:1.2rem;
+      text-decoration:none; color:var(--text);
     }
-
     .logo-icon {
-      width: 36px;
-      height: 36px;
-      background: var(--emerald);
-      border-radius: 9px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
+      width:34px; height:34px; background:var(--emerald);
+      border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem;
     }
+    .logo em { font-style:normal; color:var(--emerald); }
 
-    .logo em { font-style: normal; color: var(--emerald); }
+    .theme-toggle {
+      background:var(--glass); border:1px solid var(--glass-border);
+      color:var(--text); cursor:pointer; border-radius:20px;
+      padding:0.3rem 0.7rem; font-size:0.78rem;
+      font-family:'DM Sans',sans-serif; font-weight:500;
+      display:flex; align-items:center; gap:0.4rem; transition:all 0.2s;
+    }
+    .theme-toggle:hover { border-color:var(--emerald); color:var(--emerald); }
 
-    .main { max-width: 780px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    .main { max-width:780px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+
+    /* ── Summary stats ── */
+    .summary-stats {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem;
+      margin-bottom:2rem; animation:fadeUp 0.5s ease both;
+    }
+    .stat-box {
+      background:var(--card-bg); border:1px solid var(--glass-border);
+      border-radius:14px; padding:1rem 1.2rem; text-align:center;
+    }
+    .stat-box-num { font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--emerald); }
+    .stat-box-label { font-size:0.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-top:0.15rem; }
 
     /* ── Page header ── */
-    .page-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 2.5rem;
-      animation: fadeUp 0.5s ease both;
-    }
-
+    .page-header { display:flex; align-items:center; gap:1rem; margin-bottom:2rem; animation:fadeUp 0.55s ease both; }
     .page-header-icon {
-      width: 52px;
-      height: 52px;
-      background: rgba(0,200,150,0.15);
-      border: 1px solid rgba(0,200,150,0.3);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
+      width:50px; height:50px; background:rgba(0,200,150,0.12);
+      border:1px solid rgba(0,200,150,0.3); border-radius:13px;
+      display:flex; align-items:center; justify-content:center; font-size:1.4rem;
     }
+    .page-header h1 { font-family:'Playfair Display',serif; font-size:1.75rem; }
+    .page-header p { color:var(--muted); font-size:0.85rem; margin-top:0.2rem; }
 
-    .page-header h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.8rem;
-    }
-
-    .page-header p { color: var(--muted); font-size: 0.875rem; margin-top: 0.2rem; }
-
-    /* ── Symptom chips ── */
-    .section-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.75rem;
-    }
-
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 2rem;
-      animation: fadeUp 0.6s ease both;
-    }
-
+    /* ── Chips ── */
+    .section-label { font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:0.7rem; }
+    .chips { display:flex; flex-wrap:wrap; gap:0.45rem; margin-bottom:1.75rem; animation:fadeUp 0.6s ease both; }
     .chip {
-      background: rgba(255,255,255,0.07);
-      border: 1px solid var(--glass-border);
-      border-radius: 999px;
-      padding: 0.35rem 0.85rem;
-      font-size: 0.82rem;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
+      background:rgba(255,255,255,0.07); border:1px solid var(--glass-border);
+      border-radius:999px; padding:0.3rem 0.8rem; font-size:0.8rem;
+      display:flex; align-items:center; gap:0.35rem;
     }
-
-    .chip-sev {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
+    [data-theme="light"] .chip { background:rgba(11,29,58,0.05); }
+    .chip-sev { width:7px; height:7px; border-radius:50%; }
 
     /* ── Diagnosis cards ── */
-    .diagnoses { display: flex; flex-direction: column; gap: 1.25rem; }
-
+    .diagnoses { display:flex; flex-direction:column; gap:1.1rem; }
     .diag-card {
-      background: var(--glass);
+      background: var(--card-bg);
       border: 1px solid var(--glass-border);
-      border-radius: 18px;
-      overflow: hidden;
-      animation: fadeUp 0.7s ease both;
+      border-radius: 16px;
+      padding: 1.8rem;
+      backdrop-filter: blur(12px);
+      margin-bottom: 1.2rem;
+      animation: slideIn 0.5s ease-out;
+      transition: var(--transition);
     }
 
-    .diag-card:nth-child(2) { animation-delay: 0.08s; }
-    .diag-card:nth-child(3) { animation-delay: 0.16s; }
-    .diag-card:nth-child(4) { animation-delay: 0.24s; }
-    .diag-card:nth-child(5) { animation-delay: 0.32s; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
 
-    .diag-card.primary { border-color: rgba(0,200,150,0.35); }
+    .diag-card:nth-child(1) { animation-delay: 0.1s; }
+    .diag-card:nth-child(2) { animation-delay: 0.2s; }
+    .diag-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .diag-card.primary {
+      border-color: var(--emerald);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+      box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2);
+    }
+
+    .diag-card:hover {
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.05);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+    }
 
     .diag-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--glass-border);
+      align-items: flex-start;
+      margin-bottom: 1.2rem;
     }
 
-    .diag-name-wrap { display: flex; align-items: center; gap: 0.75rem; }
-
+    .diag-name-wrap { display: flex; align-items: flex-start; gap: 1rem; }
     .diag-rank {
-      width: 32px;
-      height: 32px;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--blue) 100%);
+      color: white;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
-      font-weight: 700;
+      font-weight: 800;
       flex-shrink: 0;
     }
 
-    .rank-1 { background: var(--emerald); color: var(--navy); }
-    .rank-other { background: rgba(255,255,255,0.1); color: var(--white); }
+    .diag-rank.rank-other {
+      background: var(--glass-border);
+      color: var(--text-secondary);
+    }
 
     .diag-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.15rem;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
     }
 
     .diag-badge {
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 0.25rem 0.65rem;
-      border-radius: 999px;
-      background: rgba(0,200,150,0.12);
-      color: var(--emerald);
-      border: 1px solid rgba(0,200,150,0.25);
-    }
-
-    .diag-body { padding: 1.25rem 1.5rem; }
-
-    .meds-label {
-      font-size: 0.72rem;
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--blue) 100%);
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.75rem;
+      letter-spacing: 0.05em;
     }
 
-    .med-list { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
+    /* Confidence bar enhanced */
+    .conf-bar-track {
+      height: 6px;
+      background: var(--glass-border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
 
-    .med-list li {
+    .conf-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--emerald) 0%, var(--blue) 100%);
+      transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-radius: 3px;
+    }
+
+    /* Medicine list enhanced */
+    .med-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .med-item {
+      padding: 0.8rem 0;
+      border-bottom: 1px solid var(--glass-border);
       display: flex;
       align-items: flex-start;
-      gap: 0.65rem;
-      font-size: 0.875rem;
-      line-height: 1.45;
-      color: rgba(255,255,255,0.85);
+      gap: 0.8rem;
     }
+
+    .med-item:last-child { border-bottom: none; }
 
     .med-dot {
       width: 6px;
       height: 6px;
-      border-radius: 50%;
       background: var(--emerald);
+      border-radius: 50%;
+      margin-top: 0.55rem;
       flex-shrink: 0;
-      margin-top: 0.45rem;
     }
 
-    /* ── Learn More panel ── */
+    /* Learn more button enhanced */
     .learn-more-btn {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: transparent;
-      border: none;
-      color: var(--emerald);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 0.75rem 1.5rem;
-      border-top: 1px solid var(--glass-border);
       width: 100%;
-      text-align: left;
-      letter-spacing: 0.01em;
-      transition: background 0.2s;
-    }
-    .learn-more-btn:hover { background: rgba(0,200,150,0.05); }
-    .learn-more-btn svg { transition: transform 0.3s; flex-shrink: 0; }
-    .learn-more-btn.open svg { transform: rotate(180deg); }
-
-    .info-panel {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
-    }
-    .info-panel.open { max-height: 1000px; }
-
-    .info-inner {
-      padding: 1.25rem 1.5rem 1.5rem;
-      border-top: 1px solid var(--glass-border);
-      background: rgba(0,0,0,0.15);
-    }
-
-    .info-loading {
+      padding: 0.85rem;
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+      border-radius: 10px;
+      cursor: pointer;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 0.6rem;
-      color: var(--muted);
-      font-size: 0.85rem;
+      margin-top: 1rem;
+      transition: var(--transition);
+      font-weight: 600;
+      font-size: 0.9rem;
     }
 
-    .info-spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--glass-border);
-      border-top-color: var(--emerald);
+    .learn-more-btn:hover {
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.05);
+      color: var(--emerald);
+    }
+    /* ── Confidence bar ── */
+     .conf-bar-track {
+      height: 6px;
+      background: var(--glass-border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .conf-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--emerald) 0%, var(--blue) 100%);
+      transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-radius: 3px;
+    }
+
+    /* ── Meds ── */
+    .med-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .med-item {
+      padding: 0.8rem 0;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+    }
+
+    .med-item:last-child { border-bottom: none; }
+
+    .med-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--emerald);
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      margin-top: 0.55rem;
       flex-shrink: 0;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .info-content {
-      font-size: 0.875rem;
-      line-height: 1.7;
-      color: rgba(255,255,255,0.88);
-    }
-
-    /* Render markdown-like bold and bullets from Claude's response */
-    .info-content .info-section { margin-bottom: 1rem; }
-    .info-content .info-section:last-child { margin-bottom: 0; }
-    .info-content strong { color: var(--emerald); font-weight: 600; }
-    .info-content ul { list-style: none; padding: 0; margin: 0.4rem 0 0; display: flex; flex-direction: column; gap: 0.35rem; }
-    .info-content ul li { display: flex; gap: 0.5rem; align-items: flex-start; }
-    .info-content ul li::before { content: '·'; color: var(--emerald); font-size: 1rem; line-height: 1.4; flex-shrink: 0; }
-
-    /* ── Actions ── */
-    .actions {
-      display: flex;
-      gap: 0.75rem;
-      margin-top: 2.5rem;
-      animation: fadeUp 0.9s ease both;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.8rem 1.5rem;
-      border-radius: 12px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-
-    .btn-primary {
-      background: var(--emerald);
-      color: var(--navy);
-      border: none;
-    }
-    .btn-primary:hover { background: #00a37a; }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--white);
+    <!-- Health tips -->
+        <div class="health-tips" style="background:rgba(0,200,150,0.08); border:1px solid rgba(0,200,150,0.2); border-radius:12px; padding:1rem; margin-top:1rem; font-size:0.85rem; color:var(--muted); line-height:1.6;">
+          <strong style="color:var(--emerald); display:block; margin-bottom:0.5rem;">💡 Health Tips:</strong>
+          <ul style="margin-left:1.2rem; margin-top:0.5rem;">
+            <li>Rest adequately — sleep helps your immune system fight illness</li>
+            <li>Stay hydrated — drink 2-3 litres of water daily</li>
+            <li>Avoid cold/oily foods — they may worsen symptoms</li>
+            <li>Maintain hygiene — prevent spreading to others</li>
+            <li>Follow prescribed medicines without missing doses</li>
+          </ul>
+        </div>
+        <!-- Specialist recommendation -->
+        <div style="background:rgba(100,150,255,0.1); border:1px solid rgba(100,150,255,0.3); border-radius:12px; padding:1rem; margin-top:1rem; font-size:0.9rem;">
+          <strong style="color:rgba(100,150,255,0.9);">👨‍⚕️ Recommended Specialist:</strong>
+          <div style="font-size:1.1rem; font-weight:700; color:rgba(100,150,255,1); margin-top:0.4rem;">
+            {{ specialist }}
+          </div>
+        </div>
+    /* ── Learn More ── */
+    .diag-card {
+      background: var(--card-bg);
       border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 1.8rem;
+      backdrop-filter: blur(12px);
+      margin-bottom: 1.2rem;
+      animation: slideIn 0.5s ease-out;
+      transition: var(--transition);
     }
-    .btn-outline:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05); }
 
-    /* ── Warning banner ── */
-    .warning-banner {
-      display: flex;
-      gap: 0.75rem;
-      background: rgba(255,107,107,0.08);
-      border: 1px solid rgba(255,107,107,0.25);
-      border-radius: 14px;
-      padding: 1.1rem 1.3rem;
-      margin-top: 2rem;
-      font-size: 0.83rem;
-      color: #ffb3b3;
-      line-height: 1.55;
-      animation: fadeUp 1s ease both;
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
     }
+
+    .diag-card:nth-child(1) { animation-delay: 0.1s; }
+    .diag-card:nth-child(2) { animation-delay: 0.2s; }
+    .diag-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .diag-card.primary {
+      border-color: var(--emerald);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+      box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2);
+    }
+
+    .diag-card:hover {
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.05);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+    }
+
+    .diag-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.2rem;
+    }
+
+    .diag-name-wrap { display: flex; align-items: flex-start; gap: 1rem; }
+    .diag-rank {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--blue) 100%);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .diag-rank.rank-other {
+      background: var(--glass-border);
+      color: var(--text-secondary);
+    }
+
+    .diag-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .diag-badge {
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--blue) 100%);
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Confidence bar enhanced */
+    .conf-bar-track {
+      height: 6px;
+      background: var(--glass-border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .conf-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--emerald) 0%, var(--blue) 100%);
+      transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-radius: 3px;
+    }
+
+    /* Medicine list enhanced */
+    .med-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .med-item {
+      padding: 0.8rem 0;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+    }
+
+    .med-item:last-child { border-bottom: none; }
+
+    .med-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--emerald);
+      border-radius: 50%;
+      margin-top: 0.55rem;
+      flex-shrink: 0;
+    }
+
+    /* Learn more button enhanced */
+    .learn-more-btn {
+      width: 100%;
+      padding: 0.85rem;
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      margin-top: 1rem;
+      transition: var(--transition);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .learn-more-btn:hover {
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.05);
+      color: var(--emerald);
+    }
+    /* ── Actions ── */
+    .actions { display:flex; gap:0.75rem; margin-top:2.2rem; animation:fadeUp 0.9s ease both; flex-wrap:wrap; }
+    .btn {
+      display:inline-flex; align-items:center; gap:0.5rem;
+      padding:0.75rem 1.4rem; border-radius:12px;
+      font-family:'DM Sans',sans-serif; font-size:0.875rem; font-weight:600;
+      cursor:pointer; text-decoration:none; transition:all 0.2s;
+    }
+    .btn-primary { background:var(--emerald); color:var(--navy); border:none; }
+    .btn-primary:hover { background:var(--emerald-dim); }
+    .btn-outline { background:transparent; color:var(--text); border:1px solid var(--glass-border); }
+    .btn-outline:hover { border-color:rgba(255,255,255,0.35); background:rgba(255,255,255,0.05); }
+    [data-theme="light"] .btn-outline:hover { border-color:rgba(11,29,58,0.3); background:rgba(11,29,58,0.04); }
+
+    /* ── Warning ── */
+    .warning-banner {
+      display:flex; gap:0.75rem;
+      background:rgba(255,107,107,0.08); border:1px solid rgba(255,107,107,0.25);
+      border-radius:14px; padding:1rem 1.2rem; margin-top:1.75rem;
+      font-size:0.82rem; color:#ffb3b3; line-height:1.55;
+      animation:fadeUp 1s ease both;
+    }
+
+    /* ── Emergency banner ── */
+    .emergency-banner {
+      display:flex; gap:0.85rem; align-items:flex-start;
+      background:rgba(255,60,60,0.14); border:1.5px solid rgba(255,60,60,0.45);
+      border-radius:16px; padding:1.1rem 1.3rem; margin-bottom:1.75rem;
+      animation:pulseEmergency 2s ease-in-out infinite;
+    }
+    [data-theme="light"] .emergency-banner { background:rgba(255,60,60,0.1); }
+    @keyframes pulseEmergency { 0%,100%{box-shadow:0 0 0 0 rgba(255,60,60,0.15)} 50%{box-shadow:0 0 0 8px rgba(255,60,60,0)} }
+    .emergency-icon { font-size:1.6rem; flex-shrink:0; }
+    .emergency-title { font-size:0.95rem; font-weight:700; color:#ff5c5c; margin-bottom:0.3rem; }
+    .emergency-text { font-size:0.85rem; color:var(--text); line-height:1.55; }
+    .emergency-symptoms { font-weight:600; color:#ff5c5c; }
+     <!-- Emergency resources -->
+  {% if emergency_symptoms %}
+  <div style="margin-top:1.5rem; padding:1.2rem; background:rgba(255,107,107,0.12); border:1px solid rgba(255,107,107,0.3); border-radius:12px;">
+    <div style="font-weight:700; color:var(--danger); margin-bottom:0.8rem;">🆘 Emergency Resources:</div>
+    <div style="font-size:0.9rem; color:var(--text); line-height:1.8;">
+      <p><strong>Emergency Number:</strong> Call 108 (India) or your local emergency service</p>
+      <p><strong>Don't wait for diagnosis:</strong> Go to the nearest hospital immediately</p>
+      <button onclick="document.getElementById('hospitals-modal').style.display='block'; findNearbyHospitals();" style="width:100%; padding:0.7rem; background:var(--danger); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:700; margin-top:0.8rem;">🏥 Find Nearest Hospital</button>
+    </div>
+  </div>
+  {% endif %}
+    /* ── Why matched ── */
+    .why-matched {
+      padding:0.85rem 1.5rem; border-bottom:1px solid var(--glass-border);
+      font-size:0.82rem; color:var(--muted); line-height:1.5;
+    }
+    .why-matched strong { color:var(--emerald); }
+    .matched-pills { display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.5rem; }
+    .matched-pill {
+      background:rgba(0,200,150,0.1); border:1px solid rgba(0,200,150,0.25);
+      color:var(--emerald); font-size:0.74rem; padding:0.2rem 0.6rem; border-radius:999px;
+    }
+
+    /* ── Medicine detail card ── */
+    .med-item { display:flex; flex-direction:column; gap:0.35rem; }
+    .med-main { display:flex; align-items:flex-start; gap:0.6rem; }
+    .med-detail-toggle {
+      background:none; border:none; color:var(--emerald); cursor:pointer;
+      font-size:0.72rem; font-weight:600; padding:0; margin-left:auto;
+      text-decoration:underline; flex-shrink:0; white-space:nowrap;
+    }
+    .med-detail-card {
+      display:none; background:rgba(0,200,150,0.05); border:1px solid rgba(0,200,150,0.15);
+      border-radius:10px; padding:0.7rem 0.9rem; margin-top:0.3rem; margin-left:1.1rem;
+      font-size:0.78rem; line-height:1.5;
+    }
+    .med-detail-card.open { display:block; }
+    .med-detail-row { margin-bottom:0.35rem; }
+    .med-detail-row:last-child { margin-bottom:0; }
+    .med-detail-label { color:var(--emerald); font-weight:600; }
 
     /* ── Print ── */
     @media print {
-      body { background: #fff !important; color: #000 !important; }
-      header, .actions, .warning-banner { display: none !important; }
-      .diag-card { border: 1px solid #ccc !important; break-inside: avoid; }
-      .diag-name, .page-header h1 { color: #000 !important; }
-      .chip, .med-list li { color: #333 !important; }
-      .meds-label, .section-label, .page-header p { color: #555 !important; }
+      body { background:#fff !important; color:#000 !important; }
+      header, .actions, .warning-banner, .learn-more-btn, .info-panel, .theme-toggle { display:none !important; }
+      .diag-card { border:1px solid #ccc !important; break-inside:avoid; }
+      .diag-name, .page-header h1 { color:#000 !important; }
+      .conf-bar-fill { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
     }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+
+    @media (max-width:540px) {
+      header { padding:1rem 1.2rem; }
+      .summary-stats { grid-template-columns:1fr 1fr; }
+      .main { padding:1.5rem 1rem 4rem; }
+    }
+    /* ════════════════════════════════════════════════════════════════════════
+       GLOBAL ANIMATIONS
+       ════════════════════════════════════════════════════════════════════════ */
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes shimmer {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Apply animations to elements */
+    .summary-card,
+    .feature-card,
+    .step-card,
+    .faq-item {
+      animation: fadeInUp 0.6s ease-out both;
+    }
+
+    .summary-card:nth-child(n) { animation-delay: calc(0.1s * var(--index, 1)); }
+
+    /* Smooth scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Page transitions */
+    body {
+      animation: fadeIn 0.5s ease-out;
     }
   </style>
 </head>
@@ -362,15 +624,45 @@
     <div class="logo-icon">🩺</div>
     Medi<em>Buddy</em> AI
   </a>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☀️ Light</button>
 </header>
 
 <div class="main">
+
+  {% if emergency_symptoms %}
+  <div class="emergency-banner">
+    <span class="emergency-icon">🚨</span>
+    <div>
+      <div class="emergency-title">Emergency warning</div>
+      <div class="emergency-text">
+        You reported <span class="emergency-symptoms">{{ emergency_symptoms | join(', ') }}</span> — this can indicate a serious condition. Seek immediate medical attention or call your local emergency services. This application cannot replace emergency care.
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Summary stats -->
+  <div class="summary-stats">
+    <div class="stat-box">
+      <div class="stat-box-num">{{ symptoms | length }}</div>
+      <div class="stat-box-label">Symptom{{ 's' if symptoms|length != 1 }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-box-num">{{ diagnoses | length }}</div>
+      <div class="stat-box-label">Match{{ 'es' if diagnoses|length != 1 }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-box-num" id="top-score-display">—</div>
+      <div class="stat-box-label">Confidence</div>
+    </div>
+  </div>
+
   <!-- Page heading -->
   <div class="page-header">
     <div class="page-header-icon">🩺</div>
     <div>
       <h1>Diagnosis Result</h1>
-      <p>Based on {{ symptoms | length }} reported symptom{{ 's' if symptoms | length != 1 }}</p>
+      <p>Based on {{ symptoms | length }} reported symptom{{ 's' if symptoms | length != 1 }} — review results below</p>
     </div>
   </div>
 
@@ -382,7 +674,7 @@
       {% set colors = ['#4ade80','#a3e635','#fbbf24','#f97316','#ef4444'] %}
       <div class="chip">
         <span class="chip-sev" style="background: {{ colors[sev-1] }}"></span>
-        {{ symptom }} <span style="color:var(--muted); font-size:0.75rem">&nbsp;sev {{ sev }}</span>
+        {{ symptom }} <span style="color:var(--muted);font-size:0.73rem">&nbsp;sev {{ sev }}</span>
       </div>
     {% endfor %}
   </div>
@@ -390,65 +682,90 @@
   <!-- Diagnoses -->
   <div class="section-label">Predicted Condition{{ 's' if diagnoses | length != 1 }}</div>
   <div class="diagnoses">
-    {% for illness, medicines, score in diagnoses %}
-      <div class="diag-card {{ 'primary' if loop.first }}">
+    {% for illness, medicines, score, matched, confidence in diagnoses %}
+      <div class="diag-card {{ 'primary' if loop.first }}" data-score="{{ score }}" data-confidence="{{ confidence }}" data-index="{{ loop.index }}">
         <div class="diag-header">
           <div class="diag-name-wrap">
             <div class="diag-rank {{ 'rank-1' if loop.first else 'rank-other' }}">{{ loop.index }}</div>
             <div class="diag-name">{{ illness }}</div>
           </div>
-          {% if loop.first %}
-            <div class="diag-badge">Top Match</div>
-          {% endif %}
+          {% if loop.first %}<div class="diag-badge">Top Match</div>{% endif %}
         </div>
+
+        <!-- Confidence bar -->
+        <div class="confidence-wrap">
+          <div class="confidence-top">
+            <span class="confidence-label">Match Confidence</span>
+            <span class="confidence-pct" id="pct-{{ loop.index }}">—</span>
+          </div>
+          <div class="conf-bar-track">
+            <div class="conf-bar-fill" id="bar-{{ loop.index }}" style="width:0%; background:{{ '#00c896' if loop.first else '#8fa3b1' }}"></div>
+          </div>
+        </div>
+
+        <!-- Why this disease -->
+        {% if matched %}
+        <div class="why-matched">
+          <strong>Why this match?</strong> Matched {{ matched | length }} of your {{ symptoms | length }} reported symptom{{ 's' if symptoms|length != 1 }}.
+          <div class="matched-pills">
+            {% for m in matched %}
+              <span class="matched-pill">{{ m }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
         <div class="diag-body">
           <div class="meds-label">Suggested Remedies</div>
           <ul class="med-list">
             {% for med in medicines %}
-              <li>
-                <span class="med-dot"></span>
-                <span>{{ med }}</span>
+              {% set detail = get_medicine_details(med) %}
+              <li class="med-item">
+                <div class="med-main">
+                  <span class="med-dot"></span>
+                  <span>{{ med }}</span>
+                  {% if detail %}
+                    <button class="med-detail-toggle" onclick="toggleMedDetail(this)">Info</button>
+                  {% endif %}
+                </div>
+                {% if detail %}
+                <div class="med-detail-card">
+                  <div class="med-detail-row"><span class="med-detail-label">Purpose:</span> {{ detail.purpose }}</div>
+                  <div class="med-detail-row"><span class="med-detail-label">Typical dose:</span> {{ detail.dose }}</div>
+                  <div class="med-detail-row"><span class="med-detail-label">Side effects:</span> {{ detail.side_effects }}</div>
+                </div>
+                {% endif %}
               </li>
             {% endfor %}
           </ul>
         </div>
 
-        <!-- Learn More toggle -->
-        <button class="learn-more-btn" onclick="toggleInfo(this, '{{ illness }}')">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <button class="learn-more-btn" onclick="toggleInfo(this,'{{ illness }}')">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
             <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
             <path d="M7 6v4M7 4.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
           </svg>
           Learn about {{ illness }}
-          <svg style="margin-left:auto" width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <svg style="margin-left:auto" width="13" height="13" viewBox="0 0 14 14" fill="none">
             <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
 
         <div class="info-panel" id="info-{{ loop.index }}">
           <div class="info-inner">
-            <div class="info-loading">
-              <div class="info-spinner"></div>
-              <span>Loading disease information…</span>
-            </div>
+            <div class="info-loading"><div class="info-spinner"></div><span>Loading information…</span></div>
           </div>
         </div>
-
       </div>
     {% endfor %}
   </div>
 
   <!-- Actions -->
   <div class="actions">
-    <a href="/" class="btn btn-primary">
-      ← Check again
-    </a>
-    <button onclick="window.print()" class="btn btn-outline">
-      🖨 Save as PDF
-    </button>
+    <a href="/" class="btn btn-primary">← Check again</a>
+    <button onclick="window.print()" class="btn btn-outline">🖨 Save as PDF</button>
   </div>
 
-  <!-- Disclaimer -->
   <div class="warning-banner">
     <span>⚠️</span>
     <span><strong>Medical disclaimer:</strong> These results are for informational purposes only and do not constitute a medical diagnosis. Always consult a qualified doctor before taking any medication. In case of emergency, call your local emergency services immediately.</span>
@@ -456,20 +773,49 @@
 </div>
 
 <script>
-  // Symptoms passed from Flask for context
   const PAGE_SYMPTOMS = {{ symptoms | tojson }};
-
-  // Track which panels have already loaded
   const loaded = {};
+  const CONFIDENCES = {{ diagnoses | map(attribute=4) | list | tojson }};
 
+  // ── Theme ────────────────────────────────────────────────────────────────
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-btn').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+  }
+
+  // ── Confidence bars ───────────────────────────────────────────────────────
+  function initBars() {
+    const topConfidence = CONFIDENCES[0] || 0;
+    document.getElementById('top-score-display').textContent = topConfidence > 0 ? topConfidence + '%' : 'N/A';
+
+    CONFIDENCES.forEach((pct, i) => {
+      const idx = i + 1;
+      setTimeout(() => {
+        const bar = document.getElementById(`bar-${idx}`);
+        const pctEl = document.getElementById(`pct-${idx}`);
+        if (bar) bar.style.width = pct + '%';
+        if (pctEl) pctEl.textContent = pct > 0 ? pct + '%' : 'Rule match';
+      }, 200 + i * 80);
+    });
+  }
+
+  // ── Medicine detail toggle ───────────────────────────────────────────────
+  function toggleMedDetail(btn) {
+    const card = btn.closest('.med-item').querySelector('.med-detail-card');
+    if (!card) return;
+    const isOpen = card.classList.toggle('open');
+    btn.textContent = isOpen ? 'Hide' : 'Info';
+  }
+
+  // ── Learn More ────────────────────────────────────────────────────────────
   function toggleInfo(btn, disease) {
-    const idx = btn.closest('.diag-card').querySelector('.info-panel').id.split('-')[1];
-    const panel = document.getElementById(`info-${idx}`);
-
+    const card = btn.closest('.diag-card');
+    const panel = card.querySelector('.info-panel');
+    const idx = panel.id.split('-')[1];
     btn.classList.toggle('open');
     panel.classList.toggle('open');
-
-    // Fetch only once per disease
     if (panel.classList.contains('open') && !loaded[disease]) {
       loaded[disease] = true;
       fetchInfo(panel, disease);
@@ -479,62 +825,275 @@
   async function fetchInfo(panel, disease) {
     try {
       const res = await fetch('/disease-info', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ disease, symptoms: PAGE_SYMPTOMS })
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({disease, symptoms: PAGE_SYMPTOMS})
       });
       const data = await res.json();
-      panel.querySelector('.info-inner').innerHTML =
-        `<div class="info-content">${renderMarkdown(data.info)}</div>`;
+      panel.querySelector('.info-inner').innerHTML = `<div class="info-content">${renderMarkdown(data.info)}</div>`;
     } catch {
-      panel.querySelector('.info-inner').innerHTML =
-        `<div class="info-content" style="color:var(--danger)">⚠️ Could not load information. Please try again.</div>`;
+      panel.querySelector('.info-inner').innerHTML = `<div class="info-content" style="color:var(--danger)">⚠️ Could not load information. Please try again.</div>`;
     }
   }
 
   function renderMarkdown(text) {
-    // Convert **heading** lines to styled sections, bullet lines to <ul>
     const lines = text.split('\n');
-    let html = '';
-    let inUl = false;
-
+    let html = '', inUl = false;
     for (let line of lines) {
       line = line.trim();
-      if (!line) {
-        if (inUl) { html += '</ul>'; inUl = false; }
-        continue;
-      }
-
-      // **Bold heading**
+      if (!line) { if(inUl){html+='</ul>';inUl=false;} continue; }
       if (/^\*\*(.+)\*\*$/.test(line)) {
-        if (inUl) { html += '</ul>'; inUl = false; }
-        html += `<div class="info-section"><strong>${line.replace(/\*\*/g,'')}</strong><br>`;
+        if(inUl){html+='</ul>';inUl=false;}
+        html+=`<div class="info-section"><strong>${line.replace(/\*\*/g,'')}</strong><br>`;
         continue;
       }
-
-      // Bullet: - item or • item
       if (/^[-•]\s/.test(line)) {
-        if (!inUl) { html += '<ul>'; inUl = true; }
-        html += `<li>${escHtml(line.replace(/^[-•]\s/,''))}</li>`;
+        if(!inUl){html+='<ul>';inUl=true;}
+        html+=`<li>${escHtml(line.replace(/^[-•]\s/,''))}</li>`;
         continue;
       }
-
-      // Normal line
-      if (inUl) { html += '</ul>'; inUl = false; }
-      // inline **bold**
-      const formatted = escHtml(line).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-      html += formatted + ' ';
+      if(inUl){html+='</ul>';inUl=false;}
+      html+=escHtml(line).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')+' ';
     }
-
-    if (inUl) html += '</ul>';
-    // Close any unclosed info-section divs roughly
-    html += '</div>';
+    if(inUl) html+='</ul>';
+    html+='</div>';
     return html;
   }
 
-  function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  window.addEventListener('load', initBars);
+  // ════════════════════════════════════════════════════════════════════════
+  // PHASE 7 — REMINDERS & HOSPITALS
+  // ════════════════════════════════════════════════════════════════════════
+
+  // ── Medication Reminders ──────────────────────────────────────────────
+  function openRemindersModal() {
+    document.getElementById('reminders-modal').style.display = 'block';
+    loadReminders();
+    loadVaccinations();
+  }
+
+  function closeRemindersModal() {
+    document.getElementById('reminders-modal').style.display = 'none';
+  }
+
+  function addReminder() {
+    const medicine = document.getElementById('reminder-medicine').value.trim();
+    const time = document.getElementById('reminder-time').value;
+
+    if (!medicine || !time) {
+      alert('Please enter medicine name and time');
+      return;
+    }
+
+    const reminders = JSON.parse(localStorage.getItem('medications') || '[]');
+    reminders.push({ medicine, time, id: Date.now() });
+    localStorage.setItem('medications', JSON.stringify(reminders));
+
+    document.getElementById('reminder-medicine').value = '';
+    loadReminders();
+  }
+
+  function removeReminder(id) {
+    let reminders = JSON.parse(localStorage.getItem('medications') || '[]');
+    reminders = reminders.filter(r => r.id !== id);
+    localStorage.setItem('medications', JSON.stringify(reminders));
+    loadReminders();
+  }
+
+  function loadReminders() {
+    const reminders = JSON.parse(localStorage.getItem('medications') || '[]');
+    const html = reminders.length ? reminders.map(r => `
+      <div style="background:rgba(0,200,150,0.1); border:1px solid rgba(0,200,150,0.2); border-radius:10px; padding:1rem; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-weight:700; color:var(--text);">${r.medicine}</div>
+          <div style="font-size:0.85rem; color:var(--muted);">⏰ ${r.time}</div>
+        </div>
+        <button onclick="removeReminder(${r.id})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:1.2rem;">✕</button>
+      </div>
+    `).join('') : '<p style="color:var(--muted); text-align:center;">No reminders set yet</p>';
+    document.getElementById('reminders-list').innerHTML = html;
+  }
+
+  function loadVaccinations() {
+    const vaccinations = JSON.parse(localStorage.getItem('vaccinations') || '{}');
+    document.getElementById('vacc-covid').checked = vaccinations['covid'] || false;
+    document.getElementById('vacc-flu').checked = vaccinations['flu'] || false;
+    document.getElementById('vacc-polio').checked = vaccinations['polio'] || false;
+    document.getElementById('vacc-measles').checked = vaccinations['measles'] || false;
+
+    ['covid', 'flu', 'polio', 'measles'].forEach(v => {
+      document.getElementById(`vacc-${v}`).addEventListener('change', function() {
+        let vaccinations = JSON.parse(localStorage.getItem('vaccinations') || '{}');
+        vaccinations[v] = this.checked;
+        localStorage.setItem('vaccinations', JSON.stringify(vaccinations));
+      });
+    });
+  }
+
+  // ── Hospital Locator ──────────────────────────────────────────────────
+  function openHospitalsModal() {
+    document.getElementById('hospitals-modal').style.display = 'block';
+  }
+
+  function closeHospitalsModal() {
+    document.getElementById('hospitals-modal').style.display = 'none';
+  }
+
+  function findNearbyHospitals() {
+    const btn = event.target;
+    btn.textContent = '📍 Finding hospitals...';
+    btn.disabled = true;
+
+    if (!navigator.geolocation) {
+      alert('Geolocation not supported by your browser');
+      btn.textContent = '📍 Find Hospitals Near Me';
+      btn.disabled = false;
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        displayHospitals(lat, lng);
+        btn.textContent = '📍 Find Hospitals Near Me';
+        btn.disabled = false;
+      },
+      function(error) {
+        alert('Could not get your location. Please enable location access.');
+        btn.textContent = '📍 Find Hospitals Near Me';
+        btn.disabled = false;
+      }
+    );
+  }
+
+  function displayHospitals(lat, lng) {
+    // Simulate finding hospitals near user's location
+    // In real app, this would call a Maps API
+    const hospitals = [
+      { name: 'City General Hospital', distance: Math.random() * 3 + 0.5, emergency: true },
+      { name: 'St. Mary Medical Center', distance: Math.random() * 5 + 1.5, emergency: true },
+      { name: 'Regional Health Center', distance: Math.random() * 8 + 2, emergency: false },
+      { name: 'Community Clinic', distance: Math.random() * 6 + 1, emergency: false },
+      { name: 'Primary Care Hospital', distance: Math.random() * 10 + 3, emergency: true },
+    ];
+
+    const html = hospitals
+      .sort((a, b) => a.distance - b.distance)
+      .map(h => `
+        <div style="background:rgba(0,200,150,0.1); border:1px solid rgba(0,200,150,0.2); border-radius:10px; padding:1.2rem;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+            <div style="font-weight:700; color:var(--text);">${h.name}</div>
+            ${h.emergency ? '<span style="background:var(--danger); color:white; font-size:0.7rem; font-weight:700; padding:0.3rem 0.6rem; border-radius:4px;">24/7</span>' : ''}
+          </div>
+          <div style="font-size:0.85rem; color:var(--muted);">📍 ${h.distance.toFixed(1)} km away</div>
+          <button onclick="alert('Call hospital for directions or more info')" style="width:100%; padding:0.6rem; background:transparent; border:1px solid var(--emerald); color:var(--emerald); border-radius:8px; cursor:pointer; margin-top:0.8rem; font-size:0.85rem; font-weight:600;">Call & Directions</button>
+        </div>
+      `)
+      .join('');
+
+    document.getElementById('hospitals-list').innerHTML = html;
+  }
+
+  // Check reminders periodically
+  setInterval(() => {
+    const now = new Date();
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const reminders = JSON.parse(localStorage.getItem('medications') || '[]');
+
+    reminders.forEach(r => {
+      if (r.time === currentTime && !r.notified) {
+        // Show notification
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('💊 Medication Reminder', {
+            body: `Time to take ${r.medicine}`,
+            icon: '🩺'
+          });
+        }
+        // Mark as notified (reset next day)
+        const lastNotified = localStorage.getItem('last_notified_' + r.id) || 'never';
+        const today = new Date().toDateString();
+        if (lastNotified !== today) {
+          console.log(`Reminder: Take ${r.medicine}`);
+          localStorage.setItem('last_notified_' + r.id, today);
+        }
+      }
+    });
+  }, 60000); // Check every minute
+
+  // Request notification permission on load
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
   }
 </script>
+<!-- Reminders Modal -->
+  <div id="reminders-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; backdrop-filter:blur(4px);">
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:var(--card-bg); border:1px solid var(--glass-border); border-radius:16px; padding:2rem; max-width:500px; width:90%; max-height:80vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h2 style="font-family:'Playfair Display',serif; font-size:1.5rem;">💊 Medication Reminders</h2>
+        <button onclick="closeRemindersModal()" style="background:none; border:none; color:var(--muted); font-size:1.5rem; cursor:pointer;">✕</button>
+      </div>
+
+      <div id="reminders-list" style="margin-bottom:1.5rem;"></div>
+
+      <div style="display:flex; gap:0.8rem; margin-bottom:1.5rem;">
+        <input type="text" id="reminder-medicine" placeholder="Medicine name" style="flex:1; padding:0.7rem; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:var(--text); font-family:'DM Sans',sans-serif;">
+        <input type="time" id="reminder-time" value="09:00" style="padding:0.7rem; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:var(--text); font-family:'DM Sans',sans-serif;">
+        <button onclick="addReminder()" style="padding:0.7rem 1.2rem; background:var(--emerald); color:var(--navy); font-weight:700; border:none; border-radius:8px; cursor:pointer;">Add</button>
+      </div>
+
+      <hr style="border:none; border-top:1px solid var(--glass-border); margin:1.5rem 0;">
+
+      <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem;">🔔 Vaccination Reminders</h3>
+      <div style="display:grid; gap:0.8rem;">
+        <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
+          <input type="checkbox" id="vacc-covid" style="width:18px; height:18px; accent-color:var(--emerald); cursor:pointer;">
+          <span style="color:var(--text); font-size:0.9rem;">COVID-19 Booster</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
+          <input type="checkbox" id="vacc-flu" style="width:18px; height:18px; accent-color:var(--emerald); cursor:pointer;">
+          <span style="color:var(--text); font-size:0.9rem;">Flu Shot</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
+          <input type="checkbox" id="vacc-polio" style="width:18px; height:18px; accent-color:var(--emerald); cursor:pointer;">
+          <span style="color:var(--text); font-size:0.9rem;">Polio Booster</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
+          <input type="checkbox" id="vacc-measles" style="width:18px; height:18px; accent-color:var(--emerald); cursor:pointer;">
+          <span style="color:var(--text); font-size:0.9rem;">Measles/Mumps/Rubella</span>
+        </label>
+      </div>
+
+      <button onclick="closeRemindersModal()" style="width:100%; padding:0.85rem; background:var(--emerald); color:var(--navy); font-weight:700; border:none; border-radius:10px; cursor:pointer; margin-top:1.5rem;">Done</button>
+    </div>
+  </div>
+
+  <!-- Hospitals Modal -->
+  <div id="hospitals-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; backdrop-filter:blur(4px);">
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:var(--card-bg); border:1px solid var(--glass-border); border-radius:16px; padding:2rem; max-width:500px; width:90%; max-height:80vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h2 style="font-family:'Playfair Display',serif; font-size:1.5rem;">🏥 Nearby Hospitals</h2>
+        <button onclick="closeHospitalsModal()" style="background:none; border:none; color:var(--muted); font-size:1.5rem; cursor:pointer;">✕</button>
+      </div>
+
+      <button onclick="findNearbyHospitals()" style="width:100%; padding:0.85rem; background:var(--emerald); color:var(--navy); font-weight:700; border:none; border-radius:10px; cursor:pointer; margin-bottom:1.5rem;">📍 Find Hospitals Near Me</button>
+
+      <div id="hospitals-list" style="display:grid; gap:0.8rem;"></div>
+
+      <button onclick="closeHospitalsModal()" style="width:100%; padding:0.85rem; background:transparent; border:1px solid var(--glass-border); color:var(--text); font-weight:700; border-radius:10px; cursor:pointer; margin-top:1.5rem;">Close</button>
+    </div>
+  </div>
+
+  <!-- Floating action buttons -->
+  <div style="position:fixed; bottom:2rem; right:2rem; display:flex; flex-direction:column; gap:1rem; z-index:999;">
+    <button onclick="openRemindersModal()" title="Medication Reminders" style="width:56px; height:56px; border-radius:50%; background:var(--emerald); color:var(--navy); border:none; cursor:pointer; font-size:1.5rem; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,200,150,0.3); transition:all 0.2s;">
+      💊
+    </button>
+    <button onclick="openHospitalsModal()" title="Find Hospitals" style="width:56px; height:56px; border-radius:50%; background:var(--emerald); color:var(--navy); border:none; cursor:pointer; font-size:1.5rem; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,200,150,0.3); transition:all 0.2s;">
+      🏥
+    </button>
+  </div>
 </body>
 </html>

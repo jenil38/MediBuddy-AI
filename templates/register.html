@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account — MediBuddy AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0b1d3a; --navy-mid: #132848; --emerald: #00c896; --emerald-dim: #00a37a;
+      --white: #ffffff; --muted: #8fa3b1; --danger: #ff6b6b;
+      --glass: rgba(255,255,255,0.06); --glass-border: rgba(255,255,255,0.12);
+      --bg: var(--navy); --card-bg: var(--glass); --text: var(--white);
+    }
+    [data-theme="light"] {
+      --bg: #f0f4f8; --card-bg: rgba(255,255,255,0.95); --text: #0b1d3a;
+      --muted: #5a7184; --glass-border: rgba(11,29,58,0.12); --navy-mid: #ffffff;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh; background: var(--bg);
+      background-image: radial-gradient(ellipse at 20% 10%, rgba(0,200,150,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(30,58,95,0.6) 0%, transparent 60%);
+      font-family: 'DM Sans', sans-serif; color: var(--text);
+      display: flex; align-items: center; justify-content: center; padding: 2rem 1rem;
+    }
+    .auth-card {
+      max-width: 400px; width: 100%; background: var(--card-bg);
+      border: 1px solid var(--glass-border); border-radius: 20px;
+      padding: 2.5rem; backdrop-filter: blur(12px); animation: fadeUp 0.6s ease both;
+    }
+    .auth-logo {
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-bottom: 1.6rem;
+    }
+    .logo-icon { width: 36px; height: 36px; background: var(--emerald); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .auth-logo-text { font-family: 'Playfair Display', serif; font-size: 1.25rem; }
+    .auth-logo-text span { color: var(--emerald); }
+    .auth-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; text-align: center; margin-bottom: 0.4rem; }
+    .auth-sub { color: var(--muted); font-size: 0.85rem; text-align: center; margin-bottom: 1.8rem; }
+    .field { margin-bottom: 1.1rem; }
+    .field label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .field input {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+      border-radius: 10px; padding: 0.75rem 1rem; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+    }
+    [data-theme="light"] .field input { background: rgba(11,29,58,0.04); }
+    .field input:focus { border-color: var(--emerald); }
+    .btn-auth {
+      width: 100%; background: var(--emerald); color: var(--navy); font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem; font-weight: 700; padding: 0.85rem; border: none; border-radius: 12px;
+      cursor: pointer; margin-top: 0.6rem; transition: background 0.2s;
+    }
+    .btn-auth:hover { background: var(--emerald-dim); }
+    .auth-switch { text-align: center; font-size: 0.85rem; color: var(--muted); margin-top: 1.4rem; }
+    .auth-switch a { color: var(--emerald); text-decoration: none; font-weight: 600; }
+    .flash { padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.82rem; margin-bottom: 1.2rem; }
+    .flash.error { background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.25); color: #ffb3b3; }
+    .flash.success { background: rgba(0,200,150,0.1); border: 1px solid rgba(0,200,150,0.25); color: var(--emerald); }
+    .back-home { display: block; text-align: center; margin-top: 1rem; color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+    .back-home:hover { color: var(--emerald); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">🩺</div>
+      <span class="auth-logo-text">Medi<span>Buddy</span> AI</span>
+    </div>
+    <div class="auth-title">Create your account</div>
+    <div class="auth-sub">Save your diagnosis history and track your health</div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('register') }}">
+
+  <div class="field">
+    <label>Username</label>
+    <input type="text"
+           name="username"
+           required>
+  </div>
+
+  <div class="field">
+    <label>Email</label>
+    <input type="email"
+           name="email"
+           required>
+  </div>
+
+  <div class="field">
+    <label>First Name</label>
+    <input type="text"
+           name="first_name">
+  </div>
+
+  <div class="field">
+    <label>Last Name</label>
+    <input type="text"
+           name="last_name">
+  </div>
+
+  <div class="field">
+    <label>Phone</label>
+    <input type="text"
+           name="phone">
+  </div>
+
+  <div class="field">
+    <label>Password</label>
+    <input type="password"
+           name="password"
+           required>
+  </div>
+
+  <div class="field">
+    <label>Confirm Password</label>
+    <input type="password"
+           name="confirm_password"
+           required>
+  </div>
+
+  <button class="btn-auth" type="submit">
+      Create Account
+  </button>
+
+</form>
+
+    <div class="auth-switch">Already have an account? <a href="/login">Log in</a></div>
+    <a href="/" class="back-home">← Back to home</a>
+  </div>
+</body>
+</html>

@@ -85,3 +85,17 @@ body.dark-mode button {
 body.dark-mode button:hover {
   background-color: #666;
 }
+.spotlight{
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle,
+        rgba(0,180,255,.25),
+        rgba(0,180,255,.1),
+        transparent 70%);
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    transition: 0.03s linear;
+}

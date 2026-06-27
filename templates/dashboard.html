@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Dashboard — MediBuddy AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0b1d3a; --navy-mid: #132848; --emerald: #00c896; --emerald-dim: #00a37a;
+      --white: #ffffff; --muted: #8fa3b1; --danger: #ff6b6b; --warning: #ffa500;
+      --glass: rgba(255,255,255,0.06); --glass-border: rgba(255,255,255,0.12);
+      --bg: var(--navy); --card-bg: var(--glass); --text: var(--white);
+    }
+    [data-theme="light"] {
+      --bg: #f0f4f8; --card-bg: rgba(255,255,255,0.95); --text: #0b1d3a;
+      --muted: #5a7184; --glass-border: rgba(11,29,58,0.12); --navy-mid: #ffffff;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh; background: var(--bg);
+      background-image: radial-gradient(ellipse at 20% 10%, rgba(0,200,150,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(30,58,95,0.6) 0%, transparent 60%);
+      font-family: 'DM Sans', sans-serif; color: var(--text);
+      overflow-x: hidden; transition: background 0.3s, color 0.3s;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 2.5rem; border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100;
+      background: rgba(11,29,58,0.85);
+    }
+    [data-theme="light"] header { background: rgba(255,255,255,0.9); }
+
+    .logo { display: flex; align-items: center; gap: 0.75rem; }
+    .logo-icon {
+      width: 36px; height: 36px; background: var(--emerald);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .logo-text { font-family:'Playfair Display',serif; font-size:1.3rem; }
+    .logo-text span { color: var(--emerald); }
+
+    .header-right { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-link { color: var(--muted); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
+    .nav-link:hover { color: var(--emerald); }
+
+    .theme-toggle {
+      background: var(--glass); border: 1px solid var(--glass-border); color: var(--text);
+      cursor: pointer; border-radius: 20px; padding: 0.35rem 0.75rem;
+      font-size: 0.8rem; font-family: 'DM Sans', sans-serif; font-weight: 500;
+      display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s;
+    }
+    .theme-toggle:hover { border-color: var(--emerald); color: var(--emerald); }
+
+    /* ── Main ── */
+    .main {
+      max-width: 1200px; margin: 0 auto; padding: 2.5rem;
+    }
+
+    /* ── Welcome section ── */
+    .welcome-section {
+      margin-bottom: 2.5rem; animation: fadeUp 0.6s ease both;
+    }
+    .welcome-title {
+      font-family: 'Playfair Display', serif; font-size: 2.2rem; margin-bottom: 0.4rem;
+    }
+    .welcome-sub { color: var(--muted); font-size: 0.95rem; }
+
+    /* ── Health summary grid ── */
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.2rem; margin-bottom: 2.5rem;
+    }
+    .summary-card {
+      background: var(--card-bg); border: 1px solid var(--glass-border);
+      border-radius: 16px; padding: 1.6rem; backdrop-filter: blur(12px);
+      transition: all 0.3s; animation: fadeUp 0.6s ease both;
+    }
+    .summary-card:hover { border-color: var(--emerald); }
+    .summary-card-num {
+      font-size: 2.2rem; font-weight: 700; color: var(--emerald); margin-bottom: 0.3rem;
+    }
+    .summary-card-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .summary-card-sub { font-size: 0.75rem; color: var(--muted); margin-top: 0.6rem; }
+
+    /* ── Health score bar ── */
+    .health-score-bar {
+      height: 6px; background: var(--glass-border); border-radius: 3px;
+      margin-top: 0.8rem; overflow: hidden;
+    }
+    .health-score-fill {
+      height: 100%; background: var(--emerald); width: 0%; transition: width 1s ease;
+    }
+
+    /* ── Diagnosis history ── */
+    .history-section { animation: fadeUp 0.7s ease both; }
+    .history-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 1.2rem; }
+    .history-list { display: flex; flex-direction: column; gap: 0.8rem; }
+    .history-item {
+      background: var(--card-bg); border: 1px solid var(--glass-border);
+      border-radius: 14px; padding: 1.2rem; backdrop-filter: blur(12px);
+      transition: all 0.2s;
+    }
+    .history-item:hover { border-color: var(--emerald); background: rgba(0,200,150,0.05); }
+
+    .history-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem; }
+    .history-disease { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .history-date { font-size: 0.75rem; color: var(--muted); }
+    .history-confidence {
+      font-size: 0.8rem; font-weight: 700; color: var(--emerald);
+      background: rgba(0,200,150,0.12); padding: 0.2rem 0.6rem; border-radius: 4px;
+    }
+    .history-symptoms { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center; padding: 3rem 2rem;
+      background: var(--card-bg); border: 1px dashed var(--glass-border);
+      border-radius: 16px; margin-top: 2rem;
+    }
+    .empty-state-icon { font-size: 3rem; margin-bottom: 0.8rem; }
+    .empty-state-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .empty-state-text { color: var(--muted); font-size: 0.9rem; }
+
+    /* ── Buttons ── */
+    .btn-new-check {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      background: var(--emerald); color: var(--navy); font-weight: 700;
+      text-decoration: none; padding: 0.7rem 1.5rem; border-radius: 12px;
+      transition: background 0.2s; font-size: 0.95rem;
+    }
+    .btn-new-check:hover { background: var(--emerald-dim); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .main { padding: 1.5rem; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .welcome-title { font-size: 1.8rem; }
+      header { padding: 1rem; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🩺</div>
+      <span class="logo-text">Medi<span>Buddy</span> AI</span>
+    </div>
+    <div class="header-right">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/dashboard" class="nav-link" style="color: var(--emerald); font-weight: 700;">Dashboard</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☀️ Light</button>
+      <a href="/logout" class="nav-link">Log out</a>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- Welcome section -->
+    <div class="welcome-section">
+      <div class="welcome-title">Welcome back, <span style="color: var(--emerald);">{{ user.username }}</span> 👋</div>
+      <div class="welcome-sub">Here's your health summary</div>
+    </div>
+
+    <!-- Health summary cards -->
+    <div class="summary-grid">
+      <div class="summary-card" style="animation-delay: 0.1s;">
+        <div class="summary-card-num">{{ total_diagnoses }}</div>
+        <div class="summary-card-label">Total Diagnoses</div>
+        <div class="summary-card-sub">Since you started</div>
+      </div>
+
+      <div class="summary-card" style="animation-delay: 0.2s;">
+        <div class="summary-card-num" id="health-score-display">{{ health_score }}%</div>
+        <div class="summary-card-label">Health Score</div>
+        <div class="health-score-bar">
+          <div class="health-score-fill" id="health-score-bar" style="width: {{ health_score }}%;"></div>
+        </div>
+      </div>
+
+      <div class="summary-card" style="animation-delay: 0.3s;">
+        <div class="summary-card-num">{{ last_checkup.strftime('%d') if last_checkup else '—' }}</div>
+        <div class="summary-card-label">Last Checkup</div>
+        <div class="summary-card-sub">
+          {% if last_checkup %}
+            {{ last_checkup.strftime('%b %Y') }}
+          {% else %}
+            No diagnosis yet
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="summary-card" style="animation-delay: 0.4s;">
+        <div class="summary-card-label">Most Reported Symptom</div>
+        <div style="font-size: 1.3rem; font-weight: 600; color: var(--emerald); margin-top: 0.6rem;">
+          {% if most_common_symptom %}
+            {{ most_common_symptom | title }}
+          {% else %}
+            —
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <!-- Charts section -->
+    {% if diagnoses %}
+      <div class="charts-section">
+        <!-- Pie chart: Most common diseases -->
+        <div class="chart-card">
+          <div class="chart-title">Most Common Diagnoses</div>
+          <div class="chart-container">
+            <canvas id="diseaseChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Bar chart: Monthly trend -->
+        <div class="chart-card">
+          <div class="chart-title">Monthly Diagnosis Trend</div>
+          <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+<style>
+  /* ── Charts section ── */
+    .charts-section {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem; margin-bottom: 2.5rem;
+    }
+    .chart-card {
+      background: var(--card-bg); border: 1px solid var(--glass-border);
+      border-radius: 16px; padding: 1.6rem; backdrop-filter: blur(12px);
+      animation: fadeUp 0.7s ease both;
+    }
+    .chart-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+    .chart-container { position: relative; height: 250px; }
+    /* ════════════════════════════════════════════════════════════════════════
+       GLOBAL ANIMATIONS
+       ════════════════════════════════════════════════════════════════════════ */
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes shimmer {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Apply animations to elements */
+    .summary-card,
+    .feature-card,
+    .step-card,
+    .faq-item {
+      animation: fadeInUp 0.6s ease-out both;
+    }
+
+    .summary-card:nth-child(n) { animation-delay: calc(0.1s * var(--index, 1)); }
+
+    /* Smooth scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Page transitions */
+    body {
+      animation: fadeIn 0.5s ease-out;
+    }
+</style>
+    <!-- Diagnosis history section -->
+    {% if diagnoses %}
+      <div class="history-section">
+        <div class="history-title">Your Diagnosis History</div>
+        <div class="history-list">
+          {% for diagnosis in diagnoses %}
+            <div class="history-item">
+              <div class="history-header">
+                <div>
+                  <div class="history-disease">{{ diagnosis.top_disease }}</div>
+                  <div class="history-date">{{ diagnosis.created_at.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                </div>
+                <div class="history-confidence">{{ diagnosis.confidence }}% match</div>
+              </div>
+              <div class="history-symptoms">
+                <strong>Symptoms:</strong> {{ diagnosis.symptoms }}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <div class="empty-state-title">No diagnoses yet</div>
+        <div class="empty-state-text">Start by checking your symptoms to see them appear here</div>
+        <a href="/" class="btn-new-check" style="margin-top: 1.2rem;">→ Check Symptoms Now</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-btn').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+    }
+
+    // Animate health score bar on load
+    window.addEventListener('load', () => {
+      const healthScore = {{ health_score }};
+      const bar = document.getElementById('health-score-bar');
+      setTimeout(() => {
+        bar.style.width = healthScore + '%';
+      }, 200);
+    });
+    // Chart.js for disease distribution (pie chart)
+    {% if diagnoses %}
+    const diseaseCtx = document.getElementById('diseaseChart');
+    if (diseaseCtx) {
+      new Chart(diseaseCtx, {
+        type: 'doughnut',
+        data: {
+          labels: {{ disease_labels | tojson }},
+          datasets: [{
+            data: {{ disease_data | tojson }},
+            backgroundColor: [
+              'rgba(0, 200, 150, 0.8)',
+              'rgba(255, 107, 107, 0.8)',
+              'rgba(100, 150, 255, 0.8)',
+              'rgba(255, 193, 7, 0.8)',
+              'rgba(156, 39, 176, 0.8)',
+              'rgba(76, 175, 80, 0.8)',
+            ],
+            borderColor: 'rgba(11, 29, 58, 1)',
+            borderWidth: 2,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: 'var(--text)', font: { size: 12 }, padding: 15 },
+            },
+          },
+        },
+      });
+    }
+
+    // Chart.js for monthly trend (bar chart)
+    const trendCtx = document.getElementById('trendChart');
+    if (trendCtx) {
+      new Chart(trendCtx, {
+        type: 'bar',
+        data: {
+          labels: {{ month_labels | tojson }},
+          datasets: [{
+            label: 'Diagnoses',
+            data: {{ month_data | tojson }},
+            backgroundColor: 'rgba(0, 200, 150, 0.7)',
+            borderColor: 'rgba(0, 200, 150, 1)',
+            borderWidth: 1,
+            borderRadius: 6,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'x',
+          plugins: {
+            legend: { display: false },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1, color: 'var(--muted)' },
+              grid: { color: 'var(--glass-border)' },
+            },
+            x: {
+              ticks: { color: 'var(--muted)' },
+              grid: { display: false },
+            },
+          },
+        },
+      });
+    }
+    {% endif %}
+</script>
+</body>
+</html>

@@ -22,7 +22,36 @@ def get_all_symptoms() -> list[str]:
     return sorted(_SYMPTOM_COLS)
 
 
+# ── Emergency symptom detection ────────────────────────────────────────────────
+EMERGENCY_SYMPTOMS = {
+    "chest pain", "difficulty breathing", "shortness of breath",
+    "loss of consciousness", "seizure", "severe bleeding",
+    "coughing up blood", "blue lips", "slurred speech",
+    "sudden numbness", "paralysis", "severe head injury",
+    "suicidal thoughts", "stroke symptoms", "unresponsive",
+    "severe allergic reaction", "anaphylaxis", "high fever in infant",
+}
+
+def check_emergency(symptoms: list[str]) -> list[str]:
+    """Return the list of user-entered symptoms that match known emergency red flags."""
+    input_symptoms = [s.strip().lower() for s in symptoms if s.strip()]
+    flagged = []
+    for sym in input_symptoms:
+        for emergency in EMERGENCY_SYMPTOMS:
+            # Require the user symptom to contain the FULL emergency phrase,
+            # or vice versa, with a minimum length to avoid loose false positives
+            if len(sym) >= 4 and (emergency in sym or (len(sym) >= 6 and sym in emergency)):
+                flagged.append(sym)
+                break
+    return flagged
+
+
 def get_diagnosis(symptoms: list[str], severities: list[str]) -> list[tuple]:
+    """
+    Returns a list of tuples:
+    (illness, medicines, score, matched_symptoms, confidence_pct)
+    sorted by descending score, top 3 max.
+    """
     input_symptoms = [s.strip().lower() for s in symptoms if s.strip()]
     sev_map = {}
     for i, sym in enumerate(input_symptoms):
@@ -71,8 +100,9 @@ def _dataset_match(input_symptoms, sev_map):
         _df[_df["_score"] > 0]
         .sort_values("_score", ascending=False)
         .drop_duplicates(subset=[_DISEASE_COL])
-        .head(5)
+        .head(3)
     )
+    max_score = top["_score"].max() if not top.empty else 0
     _df.drop(columns=["_score"], inplace=True)
 
     if top.empty:
@@ -83,7 +113,17 @@ def _dataset_match(input_symptoms, sev_map):
         disease = str(row[_DISEASE_COL]).strip().title()
         score = round(row["_score"], 1)
         medicines = _medicine_suggestions(disease)
-        results.append((disease, medicines, score))
+
+        # Which user symptoms actually matched a positive column for this disease
+        matched = []
+        for user_sym, col in sym_map.items():
+            if row.get(col, 0) and float(row[col]) > 0:
+                matched.append(user_sym)
+
+        confidence_pct = round((score / max_score) * 100) if max_score > 0 else 0
+        confidence_pct = max(confidence_pct, 10)  # never show 0% for an actual match
+
+        results.append((disease, medicines, score, matched, confidence_pct))
 
     return results
 
@@ -109,11 +149,11 @@ _RULES = {
 }
 
 def _rule_based_match(input_symptoms):
-    matched = []
+    matched_results = []
     for rule_syms, (illness, meds) in _RULES.items():
         if all(s in input_symptoms for s in rule_syms):
-            matched.append((illness, meds, 0))
-    return matched or [("Unknown Illness", ["Please consult a qualified doctor."], 0)]
+            matched_results.append((illness, meds, 0, list(rule_syms), 70))
+    return matched_results or [("Unknown Illness", ["Please consult a qualified doctor."], 0, [], 0)]
 
 
 # ── Comprehensive medicine database covering all 378 diseases ─────────────────
@@ -626,3 +666,49 @@ def _medicine_suggestions(disease: str) -> list[str]:
         return ["⚠️ Specialist evaluation recommended", "Treat symptoms as advised by doctor", "Regular monitoring & follow-up"]
 
     return ["⚠️ Consult a qualified doctor for personalised treatment", "Bring a list of all symptoms to your appointment", "Do not self-medicate for undiagnosed conditions"]
+
+
+# ── Medicine detail cards: purpose, dose, side effects ─────────────────────────
+# Keyed by the medicine's common/generic name as it appears at the start of each
+# suggestion string in _MED_DB (e.g. "Tab. Paracetamol 500mg..." -> "paracetamol")
+MEDICINE_DETAILS = {
+    "paracetamol":     {"purpose": "Reduces fever and relieves mild to moderate pain", "dose": "500-650mg, up to 4x/day", "side_effects": "Rare at normal dose; liver strain if overdosed"},
+    "dolo":            {"purpose": "Paracetamol brand — reduces fever and pain", "dose": "650mg, up to 3x/day", "side_effects": "Rare at normal dose; avoid exceeding daily limit"},
+    "cetrizine":       {"purpose": "Antihistamine — relieves allergy symptoms, runny nose, itching", "dose": "10mg once daily, preferably at night", "side_effects": "Drowsiness, dry mouth"},
+    "levocetirizine":  {"purpose": "Antihistamine — allergy and rhinitis relief", "dose": "5mg once daily", "side_effects": "Mild drowsiness, dry mouth"},
+    "azithromycin":    {"purpose": "Antibiotic for bacterial throat, chest, and skin infections", "dose": "500mg once daily for 3-5 days", "side_effects": "Nausea, diarrhea, abdominal pain"},
+    "amoxicillin":     {"purpose": "Antibiotic for bacterial infections (ear, throat, chest, skin)", "dose": "500mg, 2-3x/day as prescribed", "side_effects": "Diarrhea, rash, nausea"},
+    "ibuprofen":       {"purpose": "Reduces inflammation, pain, and fever", "dose": "400mg, up to 3x/day with food", "side_effects": "Stomach irritation; avoid on empty stomach"},
+    "pantoprazole":    {"purpose": "Reduces stomach acid; used for acidity, GERD, ulcers", "dose": "40mg once daily before breakfast", "side_effects": "Headache, mild nausea"},
+    "metformin":       {"purpose": "Lowers blood sugar in type 2 diabetes", "dose": "500mg as prescribed, with meals", "side_effects": "Stomach upset, mild nausea initially"},
+    "amlodipine":      {"purpose": "Lowers high blood pressure", "dose": "5mg once daily", "side_effects": "Ankle swelling, flushing, mild dizziness"},
+    "atorvastatin":    {"purpose": "Lowers cholesterol levels", "dose": "10-40mg once daily, usually at night", "side_effects": "Muscle aches, rare liver enzyme changes"},
+    "ors":             {"purpose": "Oral Rehydration Solution — replaces lost fluids and salts", "dose": "1 sachet in 1 litre water, sip throughout the day", "side_effects": "None at normal use"},
+    "domperidone":     {"purpose": "Relieves nausea and vomiting", "dose": "10mg before meals", "side_effects": "Rare; mild headache"},
+    "sumatriptan":     {"purpose": "Treats acute migraine attacks", "dose": "50mg at onset of migraine", "side_effects": "Tingling, flushing, mild chest tightness"},
+    "etoricoxib":      {"purpose": "Reduces pain and inflammation in joints", "dose": "90mg once daily", "side_effects": "Stomach upset, fluid retention"},
+    "levothyroxine":   {"purpose": "Replaces thyroid hormone in hypothyroidism", "dose": "As prescribed, empty stomach in morning", "side_effects": "Palpitations if overdosed; rare at correct dose"},
+    "acyclovir":       {"purpose": "Antiviral for herpes, shingles, chickenpox", "dose": "400-800mg as prescribed", "side_effects": "Nausea, headache, rare kidney strain"},
+    "prednisolone":    {"purpose": "Steroid — reduces inflammation in many conditions", "dose": "As prescribed, never stop suddenly", "side_effects": "Increased appetite, mood changes if prolonged use"},
+    "sertraline":      {"purpose": "Antidepressant for depression and anxiety", "dose": "50mg daily as prescribed", "side_effects": "Nausea initially, sleep changes"},
+    "escitalopram":    {"purpose": "Antidepressant for anxiety and depression", "dose": "10mg daily as prescribed", "side_effects": "Mild nausea, sleep disturbance initially"},
+    "calcium":         {"purpose": "Supports bone health, treats deficiency", "dose": "500mg daily with food", "side_effects": "Constipation if taken in excess"},
+    "ferrous sulphate":{"purpose": "Treats iron-deficiency anemia", "dose": "200mg, 1-2x daily", "side_effects": "Constipation, dark stools"},
+    "folic acid":      {"purpose": "Supports red blood cell production", "dose": "5mg once daily", "side_effects": "Very rare side effects"},
+    "betahistine":     {"purpose": "Reduces vertigo and dizziness (inner ear)", "dose": "16mg, 3x daily", "side_effects": "Mild stomach upset"},
+    "mefenamic acid":  {"purpose": "Pain relief, especially menstrual pain", "dose": "500mg as needed with food", "side_effects": "Stomach upset, drowsiness"},
+}
+
+
+def get_medicine_details(medicine_text: str) -> dict | None:
+    """
+    Given a medicine suggestion string like 'Tab. Paracetamol 500mg (if fever)',
+    extract the generic name and return its details dict, or None if not found
+    or if the entry is advice text rather than an actual medicine.
+    """
+    text_lower = medicine_text.lower()
+    for med_name, details in MEDICINE_DETAILS.items():
+        if med_name in text_lower:
+            return {"name": med_name.title(), **details}
+    return None
+
