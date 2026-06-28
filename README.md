@@ -1,5 +1,5 @@
 ## Live Demo
-https://medibuddy-ai.onrender.com
+[https://medibuddy-ai.onrender.com](https://medibuddy-ai-8nse.onrender.com)
 # 🩺 MediBuddy — AI Symptom Checker
 
 > An intelligent medical symptom checker that suggests possible diagnoses and provides friendly health information powered by AI.
