@@ -751,11 +751,12 @@
         <a href="#how-it-works">How it works</a>
         <a href="#features">Features</a>
         <a href="#faq">FAQ</a>
-      </nav>
+     </nav>
       <div class="auth-buttons">
         {% if current_user.is_authenticated %}
           <span class="user-greeting">Welcome, <strong>{{ current_user.username }}</strong></span>
           <a href="/dashboard" class="auth-link" style="color: var(--emerald); font-weight: 600;">📊 Dashboard</a>
+          <a href="/chatbot" class="auth-link">💬 Chat</a>
           <a href="/logout" class="auth-link">Log out</a>
         {% else %}
           <a href="/login" class="auth-link">Log in</a>

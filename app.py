@@ -72,7 +72,7 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 login_manager.login_message = "Please log in to access this page."
 
-_client = Groq(api_key=os.getenv("GROQ_API_KEY"))  # key is now hidden safely
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))  # key is now hidden safely
 
 with app.app_context():
     db.create_all()
@@ -317,48 +317,38 @@ def symptoms_list():
     """JSON endpoint for autocomplete."""
     return jsonify(get_all_symptoms())
 
+@app.route("/chatbot")
+@login_required
+def chatbot():
+    return render_template("chatbot.html")
 
 @app.route("/chatbot-response", methods=["POST"])
+@login_required
 def chatbot_response():
-    data = request.get_json()
-    user_message = data.get("message", "").strip()
-    history = data.get("history", [])
-
+    user_message = request.json.get("message", "")
+    
     if not user_message:
-        return jsonify({"reply": "Please describe your symptoms."})
-
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "You are MediBuddy AI, a friendly and knowledgeable medical assistant. "
-                "Help users understand their symptoms and suggest possible conditions "
-                "and general over-the-counter remedies available in India. "
-                "Be empathetic, clear, and concise. "
-                "Always end with: '⚠️ This is not a substitute for professional medical advice. Please consult a doctor.' "
-                "Keep responses under 120 words."
-            )
-        }
-    ]
-
-    for entry in history[-8:]:
-        role = "user" if entry["role"] == "user" else "assistant"
-        messages.append({"role": role, "content": entry["content"]})
-
-    messages.append({"role": "user", "content": user_message})
-
+        return jsonify({"error": "Empty message"}), 400
+    
     try:
-        response = _client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            max_tokens=200,
-            messages=messages
-        )
-        reply = response.choices[0].message.content
+        chat_completion = groq_client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are MediBuddy AI Health Assistant. Provide helpful health information and advice. Always remind users to consult healthcare professionals for serious conditions."
+                },
+                {
+                    "role": "user",
+                    "content": user_message
+                }
+            ],
+           model="llama-3.3-70b-versatile",       )
+        
+        response_text = chat_completion.choices[0].message.content
+        return jsonify({"response": response_text})
+    
     except Exception as e:
-        reply = f"I'm having trouble connecting right now. Please try again shortly. ({e})"
-
-    return jsonify({"reply": reply})
-
-
+        print(f"Groq Error: {str(e)}")
+        return jsonify({"error": str(e), "response": f"Sorry, I encountered an error: {str(e)}"}), 500
 if __name__ == "__main__":
     app.run(debug=True)
